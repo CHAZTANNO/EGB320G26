@@ -1,4 +1,6 @@
+from __future__ import print_function
 import sys
+import os
 import time
 import curses  # For capturing keyboard inputs in SSH-friendly mode
 sys.path.append("../")
@@ -6,9 +8,9 @@ sys.path.append("../")
 from DFRobot_RaspberryPi_DC_Motor import THIS_BOARD_TYPE, DFRobot_DC_Motor_IIC as Board
 
 if THIS_BOARD_TYPE:
-    board = Board(1, 0x10)    # RaspberryPi select bus 1, set address to 0x10
+    board = Board(1, 0x10)  # RaspberryPi select bus 1, set address to 0x10
 else:
-    board = Board(7, 0x10)    # RockPi select bus 7, set address to 0x10
+    board = Board(7, 0x10)  # RockPi select bus 7, set address to 0x10
 
 def board_detect():
     l = board.detecte()
@@ -23,76 +25,103 @@ def print_board_status():
     elif board.last_operate_status == board.STA_ERR_DEVICE_NOT_DETECTED:
         print("board status: device not detected")
     elif board.last_operate_status == board.STA_ERR_PARAMETER:
-        print("board status: parameter error, last operate not effective")
+        print("board status: parameter error, last operate no effective")
     elif board.last_operate_status == board.STA_ERR_SOFT_VERSION:
         print("board status: unsupported board firmware version")
 
-# Function to set target velocities for forward and rotational movement
-def setTargetVelocities(forward_velocity, rotational_velocity):
-    # Set the speeds of individual motors based on the input velocities
-    max_speed = 100  # Max speed for the motor
-    left_motor_speed = forward_velocity - rotational_velocity
-    right_motor_speed = forward_velocity + rotational_velocity
+def SetTargetVelocities(x_dot, theta_dot):
+    """
+    Set the target velocities for the robot.
+    
+    :param x_dot: Linear velocity in m/s.
+    :param theta_dot: Angular velocity in rad/s.
+    """
+    # Parameters based on motor and robot specs
+    wheel_base = 0.15  # meters
+    wheel_radius = 0.039 / 2  # meters
+    max_motor_rpm = 240  # Loaded RPM
+    max_motor_output = 100  # Motor output range is 0-100
+    max_linear_speed = (max_motor_rpm / 60) * (2 * 3.14159 * wheel_radius)  # Max speed in m/s
+    
+    # Ensure the input velocities are within the robot's limits
+    x_dot = max(min(x_dot, max_linear_speed), -max_linear_speed)
+    
+    # Convert linear and angular velocity into individual wheel velocities
+    # Differential drive kinematics
+    left_wheel_speed = (x_dot - (wheel_base / 2) * theta_dot) / wheel_radius
+    right_wheel_speed = (x_dot + (wheel_base / 2) * theta_dot) / wheel_radius
 
-    # Convert velocities to motor commands
-    left_motor_speed = max(min(left_motor_speed, 1.0), -1.0) * max_speed
-    right_motor_speed = max(min(right_motor_speed, 1.0), -1.0) * max_speed
+    # Convert wheel speeds (rad/s) to motor RPM
+    left_motor_rpm = left_wheel_speed * (60 / (2 * 3.14159))
+    right_motor_rpm = right_wheel_speed * (60 / (2 * 3.14159))
 
-    # Apply motor speeds to the board
-    if left_motor_speed > 0:
-        board.motor_movement([board.M1], board.CCW, int(abs(left_motor_speed)))
-    else:
-        board.motor_movement([board.M1], board.CW, int(abs(left_motor_speed)))
+    # Scale motor RPM to motor output range (0 to 100 for motor control)
+    left_motor_output = min(max(int((left_motor_rpm / max_motor_rpm) * max_motor_output), 0), max_motor_output)
+    right_motor_output = min(max(int((right_motor_rpm / max_motor_rpm) * max_motor_output), 0), max_motor_output)
 
-    if right_motor_speed > 0:
-        board.motor_movement([board.M2], board.CW, int(abs(right_motor_speed)))
-    else:
-        board.motor_movement([board.M2], board.CCW, int(abs(right_motor_speed)))
+    # Control the motors based on the calculated output values
+    if x_dot >= 0:  # Forward
+        board.motor_movement([board.M1], board.CCW, left_motor_output)
+        board.motor_movement([board.M2], board.CW, right_motor_output)
+    else:  # Backward
+        board.motor_movement([board.M1], board.CW, left_motor_output)
+        board.motor_movement([board.M2], board.CCW, right_motor_output)
 
-# The control loop for keyboard input
 def control_loop(stdscr):
     curses.cbreak()
     stdscr.nodelay(True)  # Don't wait for user input
     stdscr.clear()
-    stdscr.addstr(0, 0, "Use WASD keys to control the robot. Press 'Q' to quit.")
+    stdscr.addstr(0, 0, "Use WASD keys to control the tank drive. Press 'Q' to quit.")
     
     try:
         while True:
             key = stdscr.getch()  # Get the keypress
 
-            # WASD control mode
+            # Initialize velocities
+            x_dot = 0
+            theta_dot = 0
+
+            # WASD control for velocity
+            # Move forward
             if key == ord('w'):
-                setTargetVelocities(0.1, 0.0)  # Move forward with velocity 0.1 m/s
+                x_dot = 0.4  # Set forward linear velocity (m/s)
                 stdscr.addstr(1, 0, "Moving forward     ")
 
+            # Move backward
             elif key == ord('s'):
-                setTargetVelocities(-0.1, 0.0)  # Move backward with velocity -0.1 m/s
+                x_dot = -0.4  # Set backward linear velocity (m/s)
                 stdscr.addstr(1, 0, "Moving backward    ")
 
+            # Turn left
             elif key == ord('a'):
-                setTargetVelocities(0.0, 0.5)  # Turn left with rotational velocity 0.5 rad/s
+                theta_dot = 1.5  # Set left turn angular velocity (rad/s)
                 stdscr.addstr(1, 0, "Turning left       ")
 
+            # Turn right
             elif key == ord('d'):
-                setTargetVelocities(0.0, -0.5)  # Turn right with rotational velocity -0.5 rad/s
+                theta_dot = -1.5  # Set right turn angular velocity (rad/s)
                 stdscr.addstr(1, 0, "Turning right      ")
 
-            elif key == -1:  # No key pressed, stop
-                setTargetVelocities(0.0, 0.0)
+            # Stop the motors when no movement key is pressed
+            elif key == -1:
                 stdscr.addstr(1, 0, "Motors stopped     ")
 
-            elif key == ord('q'):  # Exit the loop
+            # Exit the loop if 'q' is pressed
+            elif key == ord('q'):
                 stdscr.addstr(1, 0, "Exiting control    ")
                 break
 
-            stdscr.refresh()
+            # Set target velocities for the robot
+            SetTargetVelocities(x_dot, theta_dot)
+
             time.sleep(0.1)  # Delay to reduce CPU usage
+            stdscr.refresh()
 
     except KeyboardInterrupt:
         stdscr.addstr(1, 0, "Program interrupted by user")
 
     finally:
-        setTargetVelocities(0.0, 0.0)  # Stop motors before exiting
+        board.motor_stop(board.ALL)
         stdscr.addstr(1, 0, "Motors stopped")
 
 if __name__ == "__main__":
@@ -108,5 +137,4 @@ if __name__ == "__main__":
     board.set_encoder_reduction_ratio(board.ALL, 43)
     board.set_moter_pwm_frequency(1000)
 
-    # Start control loop with keyboard input
     curses.wrapper(control_loop)
