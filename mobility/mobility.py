@@ -49,9 +49,14 @@ def SetTargetVelocities(x_dot, theta_dot):
     x_dot = max(min(x_dot, max_linear_speed), -max_linear_speed)
     
     # Convert linear and angular velocity into individual wheel velocities
-    # Differential drive kinematics
-    left_wheel_speed = (x_dot - (wheel_base / 2) * theta_dot) / wheel_radius
-    right_wheel_speed = (x_dot + (wheel_base / 2) * theta_dot) / wheel_radius
+    if x_dot == 0:
+        # Turning on the spot
+        left_wheel_speed = -theta_dot * wheel_base / (2 * wheel_radius)
+        right_wheel_speed = theta_dot * wheel_base / (2 * wheel_radius)
+    else:
+        # Differential drive kinematics
+        left_wheel_speed = (x_dot - (wheel_base / 2) * theta_dot) / wheel_radius
+        right_wheel_speed = (x_dot + (wheel_base / 2) * theta_dot) / wheel_radius
 
     # Convert wheel speeds (rad/s) to motor RPM
     left_motor_rpm = left_wheel_speed * (60 / (2 * 3.14159))
