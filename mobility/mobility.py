@@ -2,9 +2,7 @@ from __future__ import print_function
 import sys
 import os
 import time
-import curses  # For capturing keyboard inputs in SSH-friendly mode
-sys.path.append("../")
-
+import argparse  # For handling command-line arguments
 from DFRobot_RaspberryPi_DC_Motor import THIS_BOARD_TYPE, DFRobot_DC_Motor_IIC as Board
 
 if THIS_BOARD_TYPE:
@@ -67,62 +65,53 @@ def SetTargetVelocities(x_dot, theta_dot):
         board.motor_movement([board.M1], board.CW, left_motor_output)
         board.motor_movement([board.M2], board.CCW, right_motor_output)
 
-def control_loop(stdscr):
-    curses.cbreak()
-    stdscr.nodelay(True)  # Don't wait for user input
-    stdscr.clear()
-    stdscr.addstr(0, 0, "Use WASD keys to control the tank drive. Press 'Q' to quit.")
+def control_loop():
+    """
+    Interactive control loop using keyboard (WASD).
+    """
+    print("Use WASD keys to control the tank drive. Press 'Q' to quit.")
     
     try:
         while True:
-            key = stdscr.getch()  # Get the keypress
+            key = input("Enter control (W/A/S/D or Q to quit): ").lower()
 
             # Initialize velocities
             x_dot = 0
             theta_dot = 0
 
             # WASD control for velocity
-            # Move forward
-            if key == ord('w'):
+            if key == 'w':
                 SetTargetVelocities(0.4, 0)
-                stdscr.addstr(1, 0, "Moving forward     ")
+                print("Moving forward")
 
-            # Move backward
-            elif key == ord('s'):
-                SetTargetVelocities(-0.4, 0)  # Set backward linear velocity (m/s)
-                stdscr.addstr(1, 0, "Moving backward    ")
+            elif key == 's':
+                SetTargetVelocities(-0.4, 0)
+                print("Moving backward")
 
-            # Turn left
-            elif key == ord('a'):
-                SetTargetVelocities(0, -0.5)  # Set left turn angular velocity (rad/s)
-                stdscr.addstr(1, 0, "Turning left       ")
+            elif key == 'a':
+                SetTargetVelocities(0, -0.5)
+                print("Turning left")
 
-            # Turn right
-            elif key == ord('d'):
-                SetTargetVelocities(0, 0.5) # Set right turn angular velocity (rad/s)
-                stdscr.addstr(1, 0, "Turning right      ")
+            elif key == 'd':
+                SetTargetVelocities(0, 0.5)
+                print("Turning right")
 
-            # Stop the motors when no movement key is pressed
-            elif key == -1:
-                stdscr.addstr(1, 0, "Motors stopped     ")
-
-            # Exit the loop if 'q' is pressed
-            elif key == ord('q'):
-                stdscr.addstr(1, 0, "Exiting control    ")
+            elif key == 'q':
+                print("Exiting control")
                 break
 
-            # Set target velocities for the robot
-            SetTargetVelocities(x_dot, theta_dot)
+            else:
+                print("Invalid input, stopping motors")
+                SetTargetVelocities(0, 0)
 
             time.sleep(0.1)  # Delay to reduce CPU usage
-            stdscr.refresh()
 
     except KeyboardInterrupt:
-        stdscr.addstr(1, 0, "Program interrupted by user")
+        print("Program interrupted by user")
 
     finally:
         board.motor_stop(board.ALL)
-        stdscr.addstr(1, 0, "Motors stopped")
+        print("Motors stopped")
 
 if __name__ == "__main__":
     board_detect()
@@ -134,7 +123,23 @@ if __name__ == "__main__":
     print("board begin success")
 
     board.set_encoder_enable(board.ALL)
-    board.set_encoder_reduction_ratio(board.ALL, 43)
+    board.set_encoder_reduction_ratio(board.ALL, 100)
     board.set_moter_pwm_frequency(1000)
 
-    curses.wrapper(control_loop)
+    # Argument parsing for command-line mode
+    parser = argparse.ArgumentParser(description="Set robot target velocities")
+    parser.add_argument("--x_dot", type=float, help="Linear velocity (m/s)", default=None)
+    parser.add_argument("--theta_dot", type=float, help="Angular velocity (rad/s)", default=None)
+    parser.add_argument("--interactive", action="store_true", help="Start in interactive mode")
+
+    args = parser.parse_args()
+
+    if args.x_dot is not None or args.theta_dot is not None:
+        # Call SetTargetVelocities with command-line arguments
+        SetTargetVelocities(args.x_dot, args.theta_dot)
+        print(f"Set target velocities: x_dot={args.x_dot}, theta_dot={args.theta_dot}")
+    elif args.interactive:
+        # Start interactive mode
+        control_loop()
+    else:
+        print("Please provide both --x_dot and --theta_dot for command-line mode or use --interactive for manual control.")
