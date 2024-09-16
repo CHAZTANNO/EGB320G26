@@ -76,60 +76,64 @@ class NavClass:
         # What state are we in?
         state = str(self.my_sm.get_current_state())
 
-        match state:
-            case 'startState':
-                # drive towards packing bay
-                attractors = []
-                attractive_f, repulsive_f = self.field_force_calculator(attractors)
-
-                # special force considerations
-                attractive_f.append(self.attraction_calculation(self.dataDict['packingBayRB'], 1))
-
-                # drive towards packingbay
-                self.forward_vel, self.rot_vel = self.calculate_resultant_velocity(attractive_f, repulsive_f)
-
-            case 'explorationState':
-                self.forward_vel = 0
+        if state == 'startState':
+            # drive towards packing bay
+            attractors = []
+            attractive_f, repulsive_f = self.field_force_calculator(attractors)
+        
+            # special force considerations
+            attractive_f.append(self.attraction_calculation(self.dataDict['packingBayRB'], 1))
+        
+            # drive towards packingbay
+            self.forward_vel, self.rot_vel = self.calculate_resultant_velocity(attractive_f, repulsive_f)
+        
+        elif state == 'explorationState':
+            self.forward_vel = 0
+            self.rot_vel = -0.5
+        
+        elif state == 'searchState':
+            # what is attractive in this state
+            attractors = []
+            # calculate forces
+            attractive_f, repulsive_f = self.field_force_calculator(attractors)
+            attractive_f.append(self.attraction_calculation(self.rowEstimation[0], 1))
+            # drive towards desired row estimation using potential fields
+            self.forward_vel, self.rot_vel = self.calculate_resultant_velocity(attractive_f, repulsive_f)
+        
+        elif state == 'movingDownRowState':
+            # self.forward_vel, self.rot_vel = self.potential_fields()
+            attractors = ['rowMarkerRB']
+            # calculate forces
+            attractive_f, repulsive_f = self.field_force_calculator(attractors)
+            # drive towards desired row marker using potential fields
+            self.forward_vel, self.rot_vel = self.calculate_resultant_velocity(attractive_f, repulsive_f)
+        
+        elif state == 'lostInRowState':
+            # spin in a circle
+            self.forward_vel = 0
+            self.rot_vel = -0.5
+        
+        elif state == 'movingToBayState':
+            # back out of the row
+            self.forward_vel, self.rot_vel = self.back_out_with_virtual_wall()
+        
+        elif state == 'aligningWithBayState':
+            self.forward_vel = 0
+            if (self.currentObjective['shelf'] % 2) == 0:
+                self.rot_vel = 0.5
+            else:
                 self.rot_vel = -0.5
-            case 'searchState':
-                # what is attractive in this state
-                attractors = []
-                # calculate forces
-                attractive_f, repulsive_f = self.field_force_calculator(attractors)
-                attractive_f.append(self.attraction_calculation(self.rowEstimation[0], 1))
-                # drive towards desired row estimation using potential fields
-                self.forward_vel, self.rot_vel = self.calculate_resultant_velocity(attractive_f, repulsive_f)
-            case 'movingDownRowState':
-                # # what is attractive in this state
-                # attractors = ['rowMarkerRB']
-
-                # # calculate forces
-                # attractive_f, repulsive_f = self.field_force_calculator(attractors)
-                
-                # # drive towards desired row marker using potential fields
-                # self.forward_vel, self.rot_vel = self.calculate_resultant_velocity(attractive_f, repulsive_f)
-                self.forward_vel, self.rot_vel = self.potential_fields()
-            case 'lostInRowState':
-                # spin in a circle
-                self.forward_vel = 0
-                self.rot_vel = -0.5
-            case 'movingToBayState':
-                # back out of the row
-                self.forward_vel, self.rot_vel = self.back_out_with_virtual_wall()
-            case 'aligningWithBayState':
-                self.forward_vel = 0
-                if (self.currentObjective['shelf'] % 2) == 0:
-                    self.rot_vel = 0.5
-                else:     
-                    self.rot_vel = -0.5
-            case 'collectItemState':
-                self.itemState = 'Collecting'
-            case 'idleState':
-                # stop
-                self.forward_vel = 0
-                self.rot_vel = 0
-            case _:
-                pass
+        
+        elif state == 'collectItemState':
+            self.itemState = 'Collecting'
+        
+        elif state == 'idleState':
+            # stop
+            self.forward_vel = 0
+            self.rot_vel = 0
+        
+        else:
+            pass
 
     def calculate_midpoint(self, shelves_rb):
         """
