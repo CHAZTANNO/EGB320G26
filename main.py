@@ -4,6 +4,8 @@ from warehousebot_lib import *
 # Nav imports
 from navigation import NavClass as nav
 from navigation import state_machine as sm
+from mobility import mobility as mob
+from mobility import led
 
 import random
 import time
@@ -28,6 +30,7 @@ if __name__ == "__main__":
         packerBotSim.StartSimulator()
 
         navSystem = nav.NavClass()
+        led.setup()
 
         # parse order data
         navSystem.plan_objectives()
@@ -46,6 +49,9 @@ if __name__ == "__main__":
             # MOBILITY
             # update the velo and rot velo as well as LED state
             packerBotSim.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) # 
+            mob.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) #
+            led.set_LED(navSystem.LEDstate) #
+            
 
             # ITEM COLLECTION
             # tell it to collect at the objective height if needed
