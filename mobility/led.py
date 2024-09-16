@@ -1,26 +1,32 @@
 import RPi.GPIO as GPIO			# Import the GPIO module
-import time 				# Import the time module
-GPIO.setmode(GPIO.BCM)			# Set the GPIO pin naming convention to BCM
-GPIO.setup(21,GPIO.OUT)			# Set up GPIO pin 21 as an output
-GPIO.setup(20,GPIO.OUT)
-GPIO.setup(16,GPIO.OUT)
 
-GPIO.output(21,GPIO.HIGH) 		# Set GPIO pin 21 to digital high (on)
-time.sleep(1)				# Wait for 5 seconds
-GPIO.output(21,GPIO.LOW)		# Set GPIO pin 21 to digital low (off)
+def setup():
+    GPIO.setmode(GPIO.BOARD)		# Set the GPIO pin numbering scheme to BOARD
+    GPIO.setup(21, GPIO.OUT)		# Set pin 11 as an output pin
+    GPIO.setup(20, GPIO.OUT)		# Set pin 12 as an output pin
+    GPIO.setup(16, GPIO.OUT)		# Set pin 13 as an output pin
 
-GPIO.output(20,GPIO.HIGH)
-time.sleep(1)
-GPIO.output(20,GPIO.LOW)
 
-GPIO.output(16,GPIO.HIGH)
-time.sleep(1)
-GPIO.output(16,GPIO.LOW)
+def set_LED(LED):
+    led_pins = {
+        'RED': 21,
+        'YELLOW': 20,
+        'GREEN': 16
+    }
+    
+    # if LED == currentLED:
+    #     return
 
-GPIO.output(21,GPIO.HIGH)
-GPIO.output(16,GPIO.HIGH)
-time.sleep(1)
-GPIO.output(21,GPIO.LOW)
-GPIO.output(16,GPIO.LOW)
-
-GPIO.cleanup()				# Exit the GPIO session cleanly
+    if LED == 'RED':
+        GPIO.output(led_pins['RED'], GPIO.HIGH)
+        GPIO.output(led_pins['YELLOW'], GPIO.LOW)
+        GPIO.output(led_pins['GREEN'], GPIO.LOW)
+    elif LED == 'YELLOW':
+        GPIO.output(led_pins['RED'], GPIO.LOW)
+        GPIO.output(led_pins['YELLOW'], GPIO.HIGH)
+        GPIO.output(led_pins['GREEN'], GPIO.LOW)
+    elif LED == 'GREEN':
+        GPIO.output(led_pins['RED'], GPIO.LOW)
+        GPIO.output(led_pins['YELLOW'], GPIO.LOW)
+        GPIO.output(led_pins['GREEN'], GPIO.HIGH)
+    

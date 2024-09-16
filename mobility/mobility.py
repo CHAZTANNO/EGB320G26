@@ -40,7 +40,7 @@ def SetTargetVelocities(x_dot, theta_dot):
     wheel_base = 0.15  # meters
     wheel_radius = 0.039 / 2  # meters
     max_motor_rpm = 240  # Loaded RPM
-    max_motor_output = 100  # Motor output range is 0-100
+    max_motor_output = 60  # Motor output range is 0-100
     max_linear_speed = (max_motor_rpm / 60) * (2 * 3.14159 * wheel_radius)  # Max speed in m/s
     
     # Ensure the input velocities are within the robot's limits
@@ -84,22 +84,22 @@ def control_loop(stdscr):
             # WASD control for velocity
             # Move forward
             if key == ord('w'):
-                x_dot = 0.4  # Set forward linear velocity (m/s)
+                SetTargetVelocities(0.4, 0)
                 stdscr.addstr(1, 0, "Moving forward     ")
 
             # Move backward
             elif key == ord('s'):
-                x_dot = -0.4  # Set backward linear velocity (m/s)
+                SetTargetVelocities(-0.4, 0)  # Set backward linear velocity (m/s)
                 stdscr.addstr(1, 0, "Moving backward    ")
 
             # Turn left
             elif key == ord('a'):
-                theta_dot = 1.5  # Set left turn angular velocity (rad/s)
+                SetTargetVelocities(0, -0.5)  # Set left turn angular velocity (rad/s)
                 stdscr.addstr(1, 0, "Turning left       ")
 
             # Turn right
             elif key == ord('d'):
-                theta_dot = -1.5  # Set right turn angular velocity (rad/s)
+                SetTargetVelocities(0, 0.5) # Set right turn angular velocity (rad/s)
                 stdscr.addstr(1, 0, "Turning right      ")
 
             # Stop the motors when no movement key is pressed
