@@ -1,35 +1,51 @@
 import RPi.GPIO as GPIO
 import time
 
+# GPIO mode setup
 GPIO.setmode(GPIO.BCM)
 
-TRIG = 23
-ECHO = 24
+# Define GPIO pins
+TRIG = 14
+ECHO = 18
 
-print("Distance Measurement In Progress")
-
+# Set up GPIO pins
 GPIO.setup(TRIG, GPIO.OUT)
 GPIO.setup(ECHO, GPIO.IN)
 
-GPIO.output(TRIG, False)
-print("Waiting For Sensor To Settle")
-time.sleep(2)
+def distance():
+    # Send a 10µs pulse to trigger the sensor
+    GPIO.output(TRIG, GPIO.LOW)
+    time.sleep(0.05)
+    GPIO.output(TRIG, GPIO.HIGH)
+    time.sleep(0.00001)
+    GPIO.output(TRIG, GPIO.LOW)
+    
+    # Wait for the echo pin to go HIGH
+    while GPIO.input(ECHO) == GPIO.LOW:
+        pulse_start = time.time()
+    
+    # Wait for the echo pin to go LOW again
+    while GPIO.input(ECHO) == GPIO.HIGH:
+        pulse_end = time.time()
+    
+    # Calculate pulse duration and distance
+    if 'pulse_end' in locals() and 'pulse_start' in locals():
+        pulse_duration = pulse_end - pulse_start
+        distance_cm = pulse_duration * 17150
+        distance_cm = round(distance_cm, 2)
+    else:
+        distance_cm = None
+    
+    return distance_cm
 
-GPIO.output(TRIG, True)
-time.sleep(0.00001)
-GPIO.output(TRIG, False)
-
-while GPIO.input(ECHO) == 0:
-    pulse_start = time.time()
-
-while GPIO.input(ECHO) == 1:
-    pulse_end = time.time()
-
-pulse_duration = pulse_end - pulse_start
-
-distance = pulse_duration * 17150
-distance = round(distance, 2)
-
-print("Distance:", distance, "cm")
-
-GPIO.cleanup()
+try:
+    while True:
+        dist = distance()
+        if dist is not None:
+            print(f"Distance: {dist} cm")
+        else:
+            print("Failed to get reading.")
+except KeyboardInterrupt:
+    print("Measurement stopped by User")
+finally:
+    GPIO.cleanup()
