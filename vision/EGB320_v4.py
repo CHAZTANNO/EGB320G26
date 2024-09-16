@@ -7,8 +7,8 @@ import RPi.GPIO as GPIO
 # GPIO mode setup
 GPIO.setmode(GPIO.BCM)
 # Define GPIO pins
-TRIG = 14
-ECHO = 18
+TRIG = 23
+ECHO = 24
 # Set up GPIO pins
 GPIO.setup(TRIG, GPIO.OUT)
 GPIO.setup(ECHO, GPIO.IN)
@@ -35,10 +35,11 @@ degreesPerPixel = fullHFOV / fullHResolution
 blueThreshold = [79, 131, 6, 246, 20, 185]
 orangeThreshold = [0, 21, 161, 255, 71, 255]
 yellowThreshold = [21, 35, 205, 255, 195, 255]
-greenThreshold = [40, 70, 65, 185, 25, 145]
+greenThreshold = [50, 96, 73, 168, 67, 109]
 black01 = [9, 27, 85, 115, 45, 85] #good for row 1
 black02 = [9, 50, 25, 116, 36, 70] #good for row 3
 black04 = [11, 56, 0, 119, 0, 54]
+blackThreshold = [9, 56, 0, 119, 0, 85]
 square01 = [9, 50, 121, 175, 59, 84]
 homeBlackCircles = [0, 42, 74, 255, 19, 92]
 homeOrange = [6, 15, 248, 255, 186, 236]
@@ -68,13 +69,17 @@ def contourImage(frame, mask):
     return contours
 
 
-
 def items(frameHSV, thresholdVals):
     mask = threshold(frameHSV, thresholdVals, 255) 
     contours = contourImage(frameCopy, mask)
     cv2.drawContours(frameCopy, contours, -1, (0,255,0), 1)
 
-    outputRB = []
+    bottles = []
+    balls = []
+    cubes = []
+    cups = []
+    rects = []
+    bowls = []
     for contour in contours:
         x,y,w,h = cv2.boundingRect(contour)
 
@@ -94,7 +99,32 @@ def items(frameHSV, thresholdVals):
 
         cv2.putText(frameCopy, f"{itemType}, {range:.0f}mm, {bearing:.1f}*", (xText,yText), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,0), 1)
         
-        outputRB.append((range, bearing))
+        if itemType == "bottle":
+            bottles.append((range, bearing))
+        elif itemType == "ball":
+            balls.append((range, bearing))
+        elif itemType == "cube":
+            cubes.append((range, bearing))
+        elif itemType == "cup":
+            cups.append((range, bearing))
+        elif itemType == "rect":
+            rects.append((range, bearing))
+        elif itemType == "bowl":
+            bowls.append((range, bearing))
+    if bottles == []:
+        bottles = None
+    if balls == []:
+        balls = None
+    if cubes == []:
+        cubes = None
+    if cups == []:
+        cups = None
+    if rects == []:
+        rects = None
+    if bowls == []:
+        bowls = None
+    
+    outputRB = [bottles, balls, cubes, cups, rects, bowls]
     return outputRB
 
 def rowMarker(frameHSV, thresholdVals, diameter):
@@ -135,7 +165,14 @@ def rowMarker(frameHSV, thresholdVals, diameter):
     else:
         yText = minY - 10
     cv2.putText(frameCopy, f"Row {circleCount}, {meanRange:.0f}mm, {meanBearing:.1f}*", (xText,yText), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1)
-        
+    
+    outputRB = [meanRange, meanBearing]
+    if circleCount == 1:
+        return (outputRB, None, None)
+    elif circleCount == 2:
+        return (None, outputRB, None)
+    elif circleCount == 3:
+        return (None, None, outputRB)
     outputRB = [meanRange, meanBearing]
     return outputRB
 
@@ -168,6 +205,41 @@ def obstacle(frame, thresholdVals):
         cv2.putText(frameCopy, f"Obstacle, {range:.0f}mm, {bearing:.1f}*", (xText,yText), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,255), 1)
     
     return outputRB
+
+def shelves(frame, thresholdVals):
+    mask = threshold(frame, thresholdVals, 255)
+    contours = contourImage(frameCopy, mask)
+    cv2.drawContours(frameCopy, contours, -1, (0,200,90), 1)
+
+    outputRB = []
+    for contour in contours:
+        x,y,w,h = cv2.boundingRect(contour)
+        
+        if (h >= (0.95*frameSizeY)) | (y<20) | (y+h > 596): #Obstacle is too close to use height, use ultrasonic instead
+            range = 1000 #ultrasonicDistance()
+        else:
+            range = findRangeHeight(312, h)
+
+        bearing = findBearing(x, w)
+
+        outputRB.append((range, bearing))
+
+        if x < 2:
+            xText = 2
+        else:
+            xText = x
+        if y < 35:
+            yText = 25
+        else:
+            yText = y - 10
+        cv2.putText(frameCopy, f"Shelf, {range:.0f}mm, {bearing:.1f}*", (xText,yText), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,255), 1)
+    
+    outputRB = sortBearingLtoR(outputRB)
+    return outputRB
+
+def sortBearingLtoR(RB):
+    RB.sort(key = lambda x: x[1])
+    return RB
 
 def ultrasonicDistance():
     # Send a 10µs pulse to trigger the sensor
@@ -248,13 +320,13 @@ while(1):
     frameCopy = frame.copy()
     frameHSV = cv2.cvtColor(frameCopy, cv2.COLOR_BGR2HSV) 		# Convert from BGR to HSV colourspace
 
-    # itemsRB = items(frameHSV, homeOrange)
-    # rowMarkerRB = rowMarker(frameHSV, black04, 70) #replace with right size or modify function
-    # obstalcesRB = obstacle(frameHSV, homeGreen)
+    itemsRB = items(frameHSV, orangeThreshold)
+    rowMarkerRB = rowMarker(frameHSV, blackThreshold, 70) #replace with right size or modify function
+    obstalcesRB = obstacle(frameHSV, greenThreshold)
+    shelvesRB = shelves(frameHSV, blueThreshold)
 
-    # cv2.imshow("Threshold", frameCopy)			# Display thresholded frame
+    cv2.imshow("Threshold", frameCopy)			# Display thresholded frame
 
-    print(ultrasonicDistance())
 
     cv2.waitKey(1)									# Exit on keypress
 
