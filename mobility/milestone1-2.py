@@ -36,7 +36,8 @@ def control_loop(stdscr):
     curses.cbreak()
     stdscr.nodelay(True)  # Don't wait for user input
     stdscr.clear()
-    stdscr.addstr(0, 0, "Use WASD keys to control the tank drive. Press 'Q' to quit. Type a number to set speed.")
+    stdscr.addstr(0, 0, "Use WASD keys to control the tank drive. Press 'Q' to quit. Press 'I' to enter speed input mode.")
+    
     input_mode = False
     speed_str = ""  # To store speed input as a string
 
@@ -44,7 +45,6 @@ def control_loop(stdscr):
         while True:
             key = stdscr.getch()  # Get the keypress
 
-            # Check if we are in input mode for typing speed
             if input_mode:
                 # If Enter is pressed, convert the string to an integer and update the speed
                 if key == ord('\n') or key == ord('\r'):
@@ -55,6 +55,7 @@ def control_loop(stdscr):
                         stdscr.addstr(2, 0, "Invalid input. Please enter a valid number.    ")
                     speed_str = ""
                     input_mode = False  # Exit input mode
+                    stdscr.addstr(2, 0, "Press 'I' to enter input mode")
                     stdscr.refresh()
                 # Handle backspace to remove the last character
                 elif key == 127 or key == curses.KEY_BACKSPACE:
@@ -65,6 +66,10 @@ def control_loop(stdscr):
                     speed_str += chr(key)
                     stdscr.addstr(3, 0, f"Speed input: {speed_str}    ")
                 stdscr.refresh()
+                continue
+
+            # Check if input mode is active, and do not process drive commands
+            if input_mode:
                 continue
 
             # Move forward
@@ -101,12 +106,14 @@ def control_loop(stdscr):
                 stdscr.addstr(1, 0, "Exiting control    ")
                 break
 
-            # Enter input mode when a number is typed
-            elif chr(key).isdigit():
+            # Enter input mode when 'I' is pressed
+            elif key == ord('i') or key == ord('I'):
                 input_mode = True
-                speed_str = chr(key)  # Initialize the string with the first digit
-                stdscr.addstr(3, 0, f"Speed input: {speed_str}    ")
-            
+                speed_str = ""
+                stdscr.addstr(2, 0, "Enter new speed: ")
+                stdscr.addstr(3, 0, "Speed input:        ")
+                stdscr.refresh()
+
             time.sleep(0.1)  # Delay to reduce CPU usage
             stdscr.refresh()
 
