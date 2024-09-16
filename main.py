@@ -31,9 +31,11 @@ if __name__ == "__main__":
 
         # parse order data
         navSystem.plan_objectives()
+        Frequency = 10.0 #Hz
+        Interval = 1.0/Frequency
 
         while True:
-            # now = time.time()  # get the time
+            now = time.time()  # get the time
 
             # VISION SYSTEM
             # pull vision data in correct format
@@ -53,6 +55,9 @@ if __name__ == "__main__":
             packerBotSim.UpdateObjectPositions()
 
             print(navSystem.LEDstate)
+            elapsed = time.time() - now  # how long was it running?
+            if(Interval-elapsed > 0):
+                time.sleep(Interval-elapsed) # wait for amount of time left from interval
 
     except KeyboardInterrupt:
         # Attempt to stop simulator so it restarts and don't have to manually press the Stop button in VREP
