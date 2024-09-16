@@ -7,39 +7,65 @@ sys.path.append("../")
 
 from DFRobot_RaspberryPi_DC_Motor import THIS_BOARD_TYPE, DFRobot_DC_Motor_IIC as Board
 
-speed = 60
+speed = 30  # Initial speed
 
 if THIS_BOARD_TYPE:
-  board = Board(1, 0x10)    # RaspberryPi select bus 1, set address to 0x10
+    board = Board(1, 0x10)    # RaspberryPi select bus 1, set address to 0x10
 else:
-  board = Board(7, 0x10)    # RockPi select bus 7, set address to 0x10
+    board = Board(7, 0x10)    # RockPi select bus 7, set address to 0x10
 
 def board_detect():
-  l = board.detecte()
-  print("Board list conform:")
-  print(l)
+    l = board.detecte()
+    print("Board list conform:")
+    print(l)
 
 def print_board_status():
-  if board.last_operate_status == board.STA_OK:
-    print("board status: everything ok")
-  elif board.last_operate_status == board.STA_ERR:
-    print("board status: unexpected error")
-  elif board.last_operate_status == board.STA_ERR_DEVICE_NOT_DETECTED:
-    print("board status: device not detected")
-  elif board.last_operate_status == board.STA_ERR_PARAMETER:
-    print("board status: parameter error, last operate no effective")
-  elif board.last_operate_status == board.STA_ERR_SOFT_VERSION:
-    print("board status: unsupported board firmware version")
+    if board.last_operate_status == board.STA_OK:
+        print("board status: everything ok")
+    elif board.last_operate_status == board.STA_ERR:
+        print("board status: unexpected error")
+    elif board.last_operate_status == board.STA_ERR_DEVICE_NOT_DETECTED:
+        print("board status: device not detected")
+    elif board.last_operate_status == board.STA_ERR_PARAMETER:
+        print("board status: parameter error, last operate no effective")
+    elif board.last_operate_status == board.STA_ERR_SOFT_VERSION:
+        print("board status: unsupported board firmware version")
 
 def control_loop(stdscr):
+    global speed
     curses.cbreak()
     stdscr.nodelay(True)  # Don't wait for user input
     stdscr.clear()
-    stdscr.addstr(0, 0, "Use WASD keys to control the tank drive. Press 'Q' to quit.")
-    
+    stdscr.addstr(0, 0, "Use WASD keys to control the tank drive. Press 'Q' to quit. Type a number to set speed.")
+    input_mode = False
+    speed_str = ""  # To store speed input as a string
+
     try:
         while True:
             key = stdscr.getch()  # Get the keypress
+
+            # Check if we are in input mode for typing speed
+            if input_mode:
+                # If Enter is pressed, convert the string to an integer and update the speed
+                if key == ord('\n') or key == ord('\r'):
+                    if speed_str.isdigit():
+                        speed = int(speed_str)
+                        stdscr.addstr(2, 0, f"Speed set to {speed}      ")
+                    else:
+                        stdscr.addstr(2, 0, "Invalid input. Please enter a valid number.    ")
+                    speed_str = ""
+                    input_mode = False  # Exit input mode
+                    stdscr.refresh()
+                # Handle backspace to remove the last character
+                elif key == 127 or key == curses.KEY_BACKSPACE:
+                    speed_str = speed_str[:-1]
+                    stdscr.addstr(3, 0, f"Speed input: {speed_str}    ")
+                # Append the digit to the speed string if it's a number
+                elif chr(key).isdigit():
+                    speed_str += chr(key)
+                    stdscr.addstr(3, 0, f"Speed input: {speed_str}    ")
+                stdscr.refresh()
+                continue
 
             # Move forward
             if key == ord('w'):
@@ -75,6 +101,12 @@ def control_loop(stdscr):
                 stdscr.addstr(1, 0, "Exiting control    ")
                 break
 
+            # Enter input mode when a number is typed
+            elif chr(key).isdigit():
+                input_mode = True
+                speed_str = chr(key)  # Initialize the string with the first digit
+                stdscr.addstr(3, 0, f"Speed input: {speed_str}    ")
+            
             time.sleep(0.1)  # Delay to reduce CPU usage
             stdscr.refresh()
 
