@@ -34,6 +34,10 @@ def SetTargetVelocities(x_dot, theta_dot):
     :param x_dot: Linear velocity in m/s.
     :param theta_dot: Angular velocity in rad/s.
     """
+    if x_dot is None or theta_dot is None:
+        print("Error: Invalid velocity inputs")
+        return
+
     # Parameters based on motor and robot specs
     wheel_base = 0.15  # meters
     wheel_radius = 0.039 / 2  # meters
@@ -53,17 +57,17 @@ def SetTargetVelocities(x_dot, theta_dot):
     left_motor_rpm = left_wheel_speed * (60 / (2 * 3.14159))
     right_motor_rpm = right_wheel_speed * (60 / (2 * 3.14159))
 
-    # Scale motor RPM to motor output range (0 to 100 for motor control)
-    left_motor_output = min(max(int((left_motor_rpm / max_motor_rpm) * max_motor_output), 0), max_motor_output)
-    right_motor_output = min(max(int((right_motor_rpm / max_motor_rpm) * max_motor_output), 0), max_motor_output)
+    # Determine the direction for each motor based on wheel speed
+    left_direction = board.CCW if left_motor_rpm >= 0 else board.CW
+    right_direction = board.CW if right_motor_rpm >= 0 else board.CCW
 
-    # Control the motors based on the calculated output values
-    if x_dot >= 0:  # Forward
-        board.motor_movement([board.M1], board.CCW, left_motor_output)
-        board.motor_movement([board.M2], board.CW, right_motor_output)
-    else:  # Backward
-        board.motor_movement([board.M1], board.CW, left_motor_output)
-        board.motor_movement([board.M2], board.CCW, right_motor_output)
+    # Scale motor RPM to motor output range (0 to 100 for motor control)
+    left_motor_output = min(max(int(abs(left_motor_rpm / max_motor_rpm) * max_motor_output), 0), max_motor_output)
+    right_motor_output = min(max(int(abs(right_motor_rpm / max_motor_rpm) * max_motor_output), 0), max_motor_output)
+
+    # Control the motors based on the calculated output values and directions
+    board.motor_movement([board.M1], left_direction, left_motor_output)
+    board.motor_movement([board.M2], right_direction, right_motor_output)
 
 def control_loop():
     """
@@ -105,6 +109,7 @@ def control_loop():
                 SetTargetVelocities(0, 0)
 
             time.sleep(0.1)  # Delay to reduce CPU usage
+            print_board_status()  # Check board status after each keypress
 
     except KeyboardInterrupt:
         print("Program interrupted by user")
