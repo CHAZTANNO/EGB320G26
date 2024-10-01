@@ -50,12 +50,14 @@ def SetTargetVelocities(x_dot, theta_dot):
         right_wheel_speed = x_dot + (theta_dot * wheel_base) / 2
     
     print(left_wheel_speed)
-
+    print(right_wheel_speed)
+ 
     # Convert wheel speeds (rad/s) to motor RPM
     # RPM = (V / (π × D)) × 60
     left_motor_rpm = (left_wheel_speed / (pi * wheel_diameter)) * 60
-    print(left_motor_rpm)
     right_motor_rpm = (right_wheel_speed / (pi * wheel_diameter)) * 60
+    print(left_motor_rpm)
+    print(right_motor_rpm)
 
     # Determine the direction for each motor based on wheel speed
     left_direction = "CCW" if left_motor_rpm >= 0 else "CW"
