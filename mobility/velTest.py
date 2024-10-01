@@ -64,8 +64,8 @@ def SetTargetVelocities(x_dot, theta_dot):
     # right_direction = board.CW if right_motor_rpm >= 0 else board.CCW
 
     # Scale motor RPM to motor output range (0 to 100 for motor control)
-    left_motor_output = min(max(int(abs(left_motor_rpm / max_motor_rpm) * max_motor_output), 0), max_motor_output)
-    right_motor_output = min(max(int(abs(right_motor_rpm / max_motor_rpm) * max_motor_output), 0), max_motor_output)
+    left_motor_output = min(max(abs(left_motor_rpm / max_motor_rpm * max_motor_output), 0), max_motor_output)
+    right_motor_output = min(max(abs(right_motor_rpm / max_motor_rpm * max_motor_output), 0), max_motor_output)
 
     # Control the motors based on the calculated output values and directions
     # board.motor_movement([board.M1], left_direction, left_motor_output)
