@@ -80,6 +80,7 @@ while(1):
     square01 = [9, 50, 121, 175, 59, 84]
     square02 = [16, 38, 50, 133, 40, 129]
     wallThreshold = [2, 42, 0, 70, 150, 232]
+    wallThreshold2 = [2, 47, 6, 70, 150, 221]
 
     blueThreshold = [92, 130, 95, 255, 30, 179]
     greenThreshold = [35, 90, 70, 190, 15, 120]
@@ -90,6 +91,7 @@ while(1):
 
 
     whiteMask = threshold(frameHSV, wallThreshold) 
+    maskedImage = cv2.bitwise_and(frame, frame, mask= whiteMask)
     contours = contourImage(frameHSV, whiteMask)
     if contours:  # Make sure there are contours
         usefulContour = max(contours, key=cv2.contourArea) #only one packing station, so just take the largest
@@ -140,6 +142,7 @@ while(1):
     # combinedThreshold = whitedil & greydil
     cv2.imshow("Threshold", frame)			# Display thresholded frame
     cv2.imshow("Original", whiteMask)
+    cv2.imshow("hi", maskedImage)
 
 
     cv2.waitKey(1)									# Exit on keypress
