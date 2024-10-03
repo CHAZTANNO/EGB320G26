@@ -9,7 +9,7 @@ cap.set_controls({"ColourGains":(1.4,1.5)})
 cap.start()
 
 frame = cap.capture_array()
-cv2.imwrite("green01.png", frame)		# Save the frame as frame01.png
+cv2.imwrite("carpet01.png", frame)		# Save the frame as frame01.png
 
 cap.close() # Release the camera object (if using picamera2)
 cv2.destroyAllWindows() # Close all opencv pop-up windows
