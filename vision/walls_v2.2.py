@@ -111,7 +111,7 @@ while(1):
             length = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)  # Calculate Euclidean distance
 
             # Check if this line is the longest
-            if (length > max_length) & (x1 < height/2-2):
+            if (length > max_length) & ((x1 < height/2-2) | (x1 > height/2+2)):
                 max_length = length
                 longest_line = (x1, y1, x2, y2)
 
