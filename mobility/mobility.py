@@ -40,39 +40,42 @@ def SetTargetVelocities(x_dot, theta_dot):
 
     # Parameters based on motor and robot specs
     wheel_base = 0.15  # meters
-    wheel_radius = 0.039 / 2  # meters
+    wheel_diameter = 0.039  # meters
     max_motor_rpm = 240  # Loaded RPM
     max_motor_output = 60  # Motor output range is 0-100
-    max_linear_speed = (max_motor_rpm / 60) * (2 * 3.14159 * wheel_radius)  # Max speed in m/s
     
-    # Ensure the input velocities are within the robot's limits
-    x_dot = max(min(x_dot, max_linear_speed), -max_linear_speed)
-    
-    # Convert linear and angular velocity into individual wheel velocities
-    if x_dot == 0:
-        # Turning on the spot
-        left_wheel_speed = -theta_dot * wheel_base / (2 * wheel_radius)
-        right_wheel_speed = theta_dot * wheel_base / (2 * wheel_radius)
+    if (x_dot == 0):
+        left_wheel_speed = -theta_dot
+        right_wheel_speed = theta_dot
     else:
-        # Differential drive kinematics
-        left_wheel_speed = (x_dot - (wheel_base / 2) * theta_dot) / wheel_radius
-        right_wheel_speed = (x_dot + (wheel_base / 2) * theta_dot) / wheel_radius
-
+        left_wheel_speed = x_dot - (theta_dot * wheel_base) / 2
+        right_wheel_speed = x_dot + (theta_dot * wheel_base) / 2
+    
+    print(left_wheel_speed)
+    print(right_wheel_speed)
+ 
     # Convert wheel speeds (rad/s) to motor RPM
-    left_motor_rpm = left_wheel_speed * (60 / (2 * 3.14159))
-    right_motor_rpm = right_wheel_speed * (60 / (2 * 3.14159))
+    # RPM = (V / (π × D)) × 60
+    left_motor_rpm = (left_wheel_speed / (pi * wheel_diameter)) * 60
+    right_motor_rpm = (right_wheel_speed / (pi * wheel_diameter)) * 60
+    print(left_motor_rpm)
+    print(right_motor_rpm)
 
     # Determine the direction for each motor based on wheel speed
+    # left_direction = "CCW" if left_motor_rpm >= 0 else "CW"
+    # right_direction = "CW" if right_motor_rpm >= 0 else "CCW"
     left_direction = board.CCW if left_motor_rpm >= 0 else board.CW
     right_direction = board.CW if right_motor_rpm >= 0 else board.CCW
 
     # Scale motor RPM to motor output range (0 to 100 for motor control)
-    left_motor_output = min(max(int(abs(left_motor_rpm / max_motor_rpm) * max_motor_output), 0), max_motor_output)
-    right_motor_output = min(max(int(abs(right_motor_rpm / max_motor_rpm) * max_motor_output), 0), max_motor_output)
+    left_motor_output = min(max(abs(left_motor_rpm / max_motor_rpm * max_motor_output), 0), max_motor_output)
+    right_motor_output = min(max(abs(right_motor_rpm / max_motor_rpm * max_motor_output), 0), max_motor_output)
 
     # Control the motors based on the calculated output values and directions
     board.motor_movement([board.M1], left_direction, left_motor_output)
     board.motor_movement([board.M2], right_direction, right_motor_output)
+    print("M1 - Direction: ", str(left_direction), "Speed: ", str(left_motor_output))
+    print("M2 - Direction: ", str(right_direction), "Speed: ", str(right_motor_output))
 
 def control_loop():
     """
