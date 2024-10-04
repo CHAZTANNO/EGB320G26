@@ -93,19 +93,19 @@ def control_loop():
 
             # WASD control for velocity
             if key == 'w':
-                SetTargetVelocities(0.4, 0)
+                SetTargetVelocities(0.06, 0)
                 print("Moving forward")
 
             elif key == 's':
-                SetTargetVelocities(-0.4, 0)
+                SetTargetVelocities(-0.06, 0)
                 print("Moving backward")
 
             elif key == 'a':
-                SetTargetVelocities(0, -0.5)
+                SetTargetVelocities(0, -0.06)
                 print("Turning left")
 
             elif key == 'd':
-                SetTargetVelocities(0, 0.5)
+                SetTargetVelocities(0, 0.06)
                 print("Turning right")
 
             elif key == 'q':
