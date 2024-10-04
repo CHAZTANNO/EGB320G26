@@ -8,13 +8,13 @@ from pprint import *
 class visionSystem:
     def __init__(self):
 
-        prevTime = 0
-        currentTime = 0
+        self.prevTime = 0
+        self.currentTime = 0
 
         self.cap = picamera2.Picamera2()
         self.frameSizeX = 300#820
         self.frameSizeY = 225#616
-        self.minArea = self.frameSizeX*self.frameSizeY / 200
+        self.minArea = self.frameSizeX*self.frameSizeY / 300
         self.currentFrame = np.zeros((self.frameSizeX, self.frameSizeY, 3), np.uint8)
         # frameCount = 0
         config = self.cap.create_video_configuration(main={"format":'XRGB8888',"size":(self.frameSizeX,self.frameSizeY)},
@@ -44,7 +44,7 @@ class visionSystem:
         black01 = [9, 27, 85, 115, 45, 85] #good for row 1
         black02 = [9, 50, 25, 116, 36, 70] #good for row 3
         black04 = [11, 56, 0, 119, 0, 54]
-        self.blackThreshold = [9, 56, 0, 119, 0, 85]
+        self.blackThreshold = [5, 60, 0, 160, 0, 120]
         square01 = [9, 50, 121, 175, 59, 84]
         homeBlackCircles = [0, 42, 74, 255, 19, 92]
         homeOrange = [6, 15, 248, 255, 186, 236]
@@ -74,7 +74,7 @@ class visionSystem:
         combinedMask = hMask & sMask & vMask # Use binary operators to combine all three masks into one
         return combinedMask
 
-    def contourImage(self, frame, mask):
+    def contourImage(self, mask):
         kernel = np.ones((8,8),np.uint8)
         maskClose = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
         maskCloseOpen = cv2.morphologyEx(maskClose, cv2.MORPH_OPEN, kernel)
@@ -151,11 +151,11 @@ class visionSystem:
         # cv2.drawContours(frame, contoursFiltered, -1, (0,255,0), 1)
         # return outputRB
 
-    def rowMarker(self, frameHSV, thresholdVals):
+    def rowMarker(self, writeFrame, frameHSV, thresholdVals):
         outputRB = [None, None, None]
         mask = self.threshold(frameHSV, thresholdVals, 255) 
         if cv2.countNonZero(mask) > self.minArea:
-            contours = self.contourImage(self.currentFrame, mask)
+            contours = self.contourImage(mask)
 
             circleCount = 0
             ranges = []
@@ -168,7 +168,7 @@ class visionSystem:
                     range = self.findRangeWidth(70, w)
                     bearing = self.findBearing(x, w)
                     circleCount += 1
-                    cv2.drawContours(self.currentFrame, [contour], 0, (0, 0, 255), 2)
+                    cv2.drawContours(writeFrame, [contour], 0, (0, 0, 255), 2)
                     ranges.append(range)
                     bearings.append(bearing)
                     xs.append(x)
@@ -178,11 +178,11 @@ class visionSystem:
                 meanBearing = np.mean(bearings)
                 minX = np.min(xs)
                 minY = np.min(ys)
-                cv2.putText(self.currentFrame, f"R{circleCount}, {meanRange:.0f}mm, {meanBearing:.1f}*", (minX,minY-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 1)
+                cv2.putText(writeFrame, f"R{circleCount}, {meanRange:.0f}mm, {meanBearing:.1f}*", (minX,minY-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,0,255), 1)
                 RB = [meanRange, meanBearing]
                 outputRB[circleCount-1] = RB
         
-        return outputRB
+        return writeFrame, outputRB
             
 
             # if minX < 2:
@@ -204,7 +204,7 @@ class visionSystem:
             #     return (None, None, outputRB)
                 
 
-    def obstacle(self, frame, thresholdVals):
+    def obstacle(self, writeFrame, frame, thresholdVals):
         mask = self.threshold(frame, thresholdVals, 255)
         if cv2.countNonZero(mask) > self.minArea:
             kernel = np.ones((8,8),np.uint8)
@@ -235,17 +235,17 @@ class visionSystem:
                 #     yText = 25
                 # else:
                 #     yText = y - 10
-                cv2.putText(self.currentFrame, f"Obstacle, {range:.0f}mm, {bearing:.1f}*", (x,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,255), 1)
+                cv2.putText(writeFrame, f"Obstacle, {range:.0f}mm, {bearing:.1f}*", (x,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255,0,255), 1)
             
-            cv2.drawContours(self.currentFrame, contours, -1, (255,0,255), 2)
+            cv2.drawContours(writeFrame, contours, -1, (255,0,255), 2)
         else:
             outputRB = None
-        return outputRB
+        return writeFrame, outputRB
 
-    def shelves(self, frame, thresholdVals):
+    def shelves(self, writeFrame, frame, thresholdVals):
         mask = self.threshold(frame, thresholdVals, 255)
         if cv2.countNonZero(mask) > self.minArea:
-            contours = self.contourImage(frame, mask)
+            contours = self.contourImage(mask)
 
             outputRB = []
             for contour in contours:
@@ -267,19 +267,19 @@ class visionSystem:
                 #     yText = 25
                 # else:
                 #     yText = y - 10
-                cv2.putText(self.currentFrame, f"Shelf, {range:.0f}mm, {bearing:.1f}*", (x,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 1)
+                cv2.putText(writeFrame, f"Shelf, {range:.0f}mm, {bearing:.1f}*", (x,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0,255,0), 1)
             
-            cv2.drawContours(self.currentFrame, contours, -1, (0,255,0), 3)
+            cv2.drawContours(writeFrame, contours, -1, (0,255,0), 3)
             outputRB = outputRB.sort(key = lambda x: x[1]) #self.sortBearingLtoR(outputRB) #sort by bearing, left to right
         else:
             outputRB = None
-        return outputRB
+        return writeFrame, outputRB
 
     # def sortBearingLtoR(self, RB):
     #     RB.sort(key = lambda x: x[1])
     #     return RB
 
-    def packingBay(self, frame, threshValsSquare, threshValsYel):
+    def packingBay(self, writeFrame, frame, threshValsSquare, threshValsYel):
         outputRB = [None, None]
         usefulContour = []
         usefulX, usefulY = 0, 0
@@ -287,7 +287,7 @@ class visionSystem:
         # if can see square, use that, if not use yellow
         maskSquare = self.threshold(frame, threshValsSquare, 255)
         if cv2.countNonZero(maskSquare) > self.minArea:
-            contoursSquare = self.contourImage(frame, maskSquare)
+            contoursSquare = self.contourImage(maskSquare)
             
 
             for contour in contoursSquare:
@@ -307,7 +307,7 @@ class visionSystem:
             #Yellow:
             maskYel = self.threshold(frame, threshValsYel, 255)
             if cv2.countNonZero(maskYel) > self.minArea:
-                contoursYel = self.contourImage(frame, maskYel)
+                contoursYel = self.contourImage(maskYel)
 
                 if contoursYel:  # Make sure there are contours
                     usefulContour = max(contoursYel, key=cv2.contourArea) #only one packing station, so just take the largest
@@ -318,45 +318,52 @@ class visionSystem:
                     usefulY = y
                     #print("Found Yellow! R: " + str(range) + " B: " + str(bearing))
         if len(usefulContour) > 0: #usefulContour has a value - something was identified
-            cv2.drawContours(self.currentFrame, [usefulContour], 0, (173, 13, 106), 2)
-            cv2.putText(self.currentFrame, f"PBay, {range:.0f}mm, {bearing:.1f}*", (usefulX,usefulY-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (173, 13, 106), 1)
+            cv2.drawContours(writeFrame, [usefulContour], 0, (173, 13, 106), 2)
+            cv2.putText(writeFrame, f"PBay, {range:.0f}mm, {bearing:.1f}*", (usefulX,usefulY-10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (173, 13, 106), 1)
             outputRB = [range, bearing]
 
-        return outputRB
+        return writeFrame, outputRB
 
 
     def GetDetectedObjects(self):
-        startTime = time.time() #start timer
+        # startTime = time.time() #start timer
 
         #camera - get frame and first step process
-        frameHSV = cv2.cvtColor(self.currentFrame, cv2.COLOR_BGR2HSV) 
+        globalFrame = self.currentFrame
+        frameHSV = cv2.cvtColor(globalFrame, cv2.COLOR_BGR2HSV) 
 
         #items
         itemsRB = [None, None, None, None, None, None]
 
         #packing bay
-        packingBayRB = self.packingBay(frameHSV, self.squareThreshold, self.yellowThreshold)
+        globalFrame, packingBayRB = self.packingBay(globalFrame, frameHSV, self.squareThreshold, self.yellowThreshold)
 
         #obstacles
-        obstaclesRB = self.obstacle(frameHSV, self.greenThreshold)
+        globalFrame, obstaclesRB = self.obstacle(globalFrame, frameHSV, self.greenThreshold)
 
         #row markers
-        rowMarkersRB = self.rowMarker(frameHSV, self.blackThreshold)
+        globalFrame, rowMarkersRB = self.rowMarker(globalFrame, frameHSV, self.blackThreshold)
 
         #shelves
-        shelvesRB = self.shelves(frameHSV, self.blueThreshold)
+        globalFrame, shelvesRB = self.shelves(globalFrame, frameHSV, self.blueThreshold)
+
+        outputRB = (itemsRB, packingBayRB, obstaclesRB, rowMarkersRB, shelvesRB)
+        print(outputRB)
 
         # Calculate frames per second (FPS)
-        endTime = time.time() #end timer
-        timeDiff = endTime - startTime
+        #endTime = time.time() #end timer
+        self.currentTime = time.time()
+        timeDiff = self.currentTime - self.prevTime
         fps = 1 / timeDiff if timeDiff > 0 else 0
-        cv2.putText(self.currentFrame, f"FPS:{fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+        self.prevTime = self.currentTime
+        cv2.putText(globalFrame, f"FPS:{fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
         
         #Resize and Display Processed Image
-        frameLarge = cv2.resize(self.currentFrame, (1200, 900), interpolation=cv2.INTER_LINEAR)
+        frameLarge = cv2.resize(globalFrame, (1200, 900), interpolation=cv2.INTER_LINEAR)
         cv2.imshow("Display", frameLarge)			# Display frame
 
         cv2.waitKey(1)
+        return outputRB
 
         
 
@@ -424,20 +431,6 @@ class visionSystem:
     #     else:
     #         return "unknown", 45 #45mm is average height
         
-    # def findWallHeight(frame, thresholdVals):
-    #     mask = self.threshold(frame, thresholdVals, 255) 
-
-    #     kernel = np.ones((5,5),np.uint8)
-    #     erosion = cv2.erode(mask,kernel,iterations = 1)
-    #     contours = self.contourImage(frame, erosion)
-
-    #     minY = 616
-    #     for contour in contours:
-    #         x,y,w,h = cv2.boundingRect(contour)
-
-    #         if y < minY:
-    #             minY = y
-    #     return minY
     def captureImage(self):
         while(1):
             #print("Capturing Image")
@@ -449,67 +442,69 @@ class visionSystem:
         return self
 
 vision_system = visionSystem().startCapture()
+globalFrame = np.zeros((vision_system.frameSizeX, vision_system.frameSizeY, 3), np.uint8)
 
 
 while(1):
-    startTime = time.time()
-    # vision_system.cap.start()
-    # vision_system.captureImage()
-    self.currentFrame = vision_system.currentFrame
-    #frame = cv2.resize(frame, (resolutionX, resolutionY))  # Lower resolution
-    #frameCount += 1
-    frameHSV = cv2.cvtColor(self.currentFrame, cv2.COLOR_BGR2HSV) 		# Convert from BGR to HSV colourspace
+    __ = vision_system.GetDetectedObjects()
+    # startTime = time.time()
+    # # vision_system.cap.start()
+    # # vision_system.captureImage()
+    # self.currentFrame = vision_system.currentFrame
+    # #frame = cv2.resize(frame, (resolutionX, resolutionY))  # Lower resolution
+    # #frameCount += 1
+    # frameHSV = cv2.cvtColor(self.currentFrame, cv2.COLOR_BGR2HSV) 		# Convert from BGR to HSV colourspace
 
-    rowThread = Thread(target=vision_system.rowMarker, args=(frameHSV, vision_system.blackThreshold,))
-    obsThread = Thread(target=vision_system.obstacle, args=(frameHSV, vision_system.greenThreshold,))
-    shelThread = Thread(target=vision_system.shelves, args=(frameHSV, vision_system.blueThreshold,))
-    PBThread = Thread(target=vision_system.packingBay, args=(frameHSV, vision_system.squareThreshold, vision_system.yellowThreshold,))
-    rowThread.start()
-    obsThread.start()
-    shelThread.start()
-    PBThread.start()
-    rowThread.join()
-    obsThread.join()
-    shelThread.join()
-    PBThread.join()
+    # rowThread = Thread(target=vision_system.rowMarker, args=(frameHSV, vision_system.blackThreshold,))
+    # obsThread = Thread(target=vision_system.obstacle, args=(frameHSV, vision_system.greenThreshold,))
+    # shelThread = Thread(target=vision_system.shelves, args=(frameHSV, vision_system.blueThreshold,))
+    # PBThread = Thread(target=vision_system.packingBay, args=(frameHSV, vision_system.squareThreshold, vision_system.yellowThreshold,))
+    # rowThread.start()
+    # obsThread.start()
+    # shelThread.start()
+    # PBThread.start()
+    # rowThread.join()
+    # obsThread.join()
+    # shelThread.join()
+    # PBThread.join()
 
 
 
-    #wallHeight = findWallHeight(frameHSV, wallThreshold)
-    #itemsRB = items(frameHSV, orangeThreshold)
-    # getImTime = time.time()
-    # #rowMarkerRB = vision_system.rowMarker(frameHSV, vision_system.blackThreshold)
-    # rowTime = time.time()
-    # #obstalcesRB = vision_system.obstacle(frameHSV, vision_system.greenThreshold)
-    # obsTime = time.time()
-    # #shelvesRB = vision_system.shelves(frameHSV, vision_system.blueThreshold)
-    # shelTime = time.time()
-    # #packingBayRB = vision_system.packingBay(frameHSV, vision_system.squareThreshold, vision_system.yellowThreshold)
-    # pbTime = time.time()
+    # #wallHeight = findWallHeight(frameHSV, wallThreshold)
+    # #itemsRB = items(frameHSV, orangeThreshold)
+    # # getImTime = time.time()
+    # # #rowMarkerRB = vision_system.rowMarker(frameHSV, vision_system.blackThreshold)
+    # # rowTime = time.time()
+    # # #obstalcesRB = vision_system.obstacle(frameHSV, vision_system.greenThreshold)
+    # # obsTime = time.time()
+    # # #shelvesRB = vision_system.shelves(frameHSV, vision_system.blueThreshold)
+    # # shelTime = time.time()
+    # # #packingBayRB = vision_system.packingBay(frameHSV, vision_system.squareThreshold, vision_system.yellowThreshold)
+    # # pbTime = time.time()
 
-    endTime = time.time()
+    # endTime = time.time()
 
-    timeDiff = endTime - startTime
+    # timeDiff = endTime - startTime
 
-    # timeforImage = 1/(getImTime - startTime)
-    # timeforRow = 1/(rowTime - getImTime)
-    # timeforObs = 1/(obsTime - rowTime)
-    # timeforShel = 1/(shelTime - obsTime)
-    # timeforPb = 1/(pbTime - shelTime)
+    # # timeforImage = 1/(getImTime - startTime)
+    # # timeforRow = 1/(rowTime - getImTime)
+    # # timeforObs = 1/(obsTime - rowTime)
+    # # timeforShel = 1/(shelTime - obsTime)
+    # # timeforPb = 1/(pbTime - shelTime)
 
-    # Calculate frames per second (FPS)
+    # # Calculate frames per second (FPS)
     
-    fps = 1 / timeDiff if timeDiff > 0 else 0
+    # fps = 1 / timeDiff if timeDiff > 0 else 0
     
 
-    cv2.putText(self.currentFrame, f"FPS:{fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
-    # print("im:", str(timeforImage), "R:", str(timeforRow), "O:", str(timeforObs), "S:", str(timeforShel), "PB:", str(timeforPb))
+    # cv2.putText(self.currentFrame, f"FPS:{fps:.2f}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+    # # print("im:", str(timeforImage), "R:", str(timeforRow), "O:", str(timeforObs), "S:", str(timeforShel), "PB:", str(timeforPb))
     
-    frameLarge = cv2.resize(self.currentFrame, (1200, 900), interpolation=cv2.INTER_LINEAR)
-    cv2.imshow("Display", frameLarge)			# Display frame
+    # frameLarge = cv2.resize(self.currentFrame, (1200, 900), interpolation=cv2.INTER_LINEAR)
+    # cv2.imshow("Display", frameLarge)			# Display frame
 
 
-    cv2.waitKey(1)									# Exit on keypress
+    # cv2.waitKey(1)									# Exit on keypress
 
 vision_system.cap.close()
 cv2.destroyAllWindows()

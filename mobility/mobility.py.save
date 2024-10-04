@@ -1,3 +1,4 @@
+
 from __future__ import print_function
 from math import pi
 import time
@@ -41,15 +42,14 @@ def SetTargetVelocities(x_dot, theta_dot):
     wheel_base = 0.15  # meters
     wheel_diameter = 0.039  # meters
     max_motor_rpm = 240  # Loaded RPM
-    max_motor_output = 100  # Motor output range is 0-100
+    max_motor_output = 40  # Motor output range is 0-100
     
-    left_wheel_speed = x_dot - (theta_dot * wheel_base) / 2
-    right_wheel_speed = x_dot + (theta_dot * wheel_base) / 2
-    
-    #if (x_dot == 0):
-    #    left_wheel_speed = -theta_dot
-    #    right_wheel_speed = theta_dot
-    #else:
+    if (x_dot == 0):
+        left_wheel_speed = -theta_dot
+        right_wheel_speed = theta_dot
+    else:
+        left_wheel_speed = x_dot - (theta_dot * wheel_base) / 2
+        right_wheel_speed = x_dot + (theta_dot * wheel_base) / 2
     
     print(left_wheel_speed)
     print(right_wheel_speed)

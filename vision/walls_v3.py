@@ -131,9 +131,9 @@ while(1):
             xAvg = int((x1+x2)/2)
             yAvg = int((y1+y2)/2)
             # print(expandedMask[yAvg, xAvg])
-            cv2.line(frame, (x1, y1), (x2, y2), (255, 0, 255), 1)
+            # cv2.line(frame, (x1, y1), (x2, y2), (255, 0, 255), 1)
             if (expandedMask[yAvg, xAvg] != 0) and ((expandedMask[y1,x1] == 0) or (x1 < 40) or (x1 > width-40)) and ((expandedMask[y2,x2] == 0) or (x2 < 40) or (x2 > width-40)):
-                cv2.line(frame, (x1, y1), (x2, y2), (0, 255, 255), 1)  # Red color for longest line
+                # cv2.line(frame, (x1, y1), (x2, y2), (0, 255, 255), 1)  # Red color for longest line
 
                 # length = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)  # Calculate Euclidean distance
 
@@ -145,60 +145,13 @@ while(1):
         # Draw the longest line
         if longest_line is not None:
             x1, y1, x2, y2 = longest_line
-            cv2.line(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)  # Red color for longest line
+            # cv2.line(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)  # Red color for longest line
+            cv2.circle(frame, (x1,y1), 10, (255,0,255), -1)
+            cv2.circle(frame, (x2,y2), 10, (255,255,0), -1)
 
 
-
-    # contours = contourImage(frameHSV, whiteMask)
-    # if contours:  # Make sure there are contours
-    #     usefulContour = max(contours, key=cv2.contourArea) #only one packing station, so just take the largest
-    #     x,y,w,h = cv2.boundingRect(usefulContour)
-    #     width=820
-    #     height=616
-    #     leftx,lefty = width,0
-    #     rightx,righty = 0,0
-    #     contour_points = [(point[0][0], point[0][1]) for point in usefulContour]
-    #     miny = max(y for (x,y) in contour_points)
-    #     variation = 25
-    #     bottom_coords = [(x, y) for x, y in contour_points if miny-variation <= y <= miny + variation]
-    #     if bottom_coords:  # Ensure there are bottom coordinates found
-    #         bottom_left = min(bottom_coords, key=lambda coord: coord[0])  # minimum x
-    #         bottom_right = max(bottom_coords, key=lambda coord: coord[0])  # maximum x
-
-
-
-    #     # for point in usefulContour:
-    #     #     x,y = point[0]
-
-    #     #     if y > lefty or y > righty:
-    #     #         if x < leftx:
-    #     #             lefty = y
-    #     #             leftx = x
-    #     #         if x > rightx:
-    #     #             righty = y
-    #     #             rightx = x
-
-    #         # if lefty is None or (y > lefty) or (y == lefty and x < leftx):
-    #         #     leftx, lefty = x, y
-
-    #         # # Check for bottom right point
-    #         # if righty is None or (y > righty) or (y == righty and x > rightx):
-    #         #     rightx, righty = x, y
-        
-    #     cv2.circle(frame, bottom_left, 10, (255,0,255), -1)
-    #     cv2.circle(frame, bottom_right, 10, (255,255,0), -1)
-
-
-
-    # greyMask = threshold(frameHSV, greyThreshold)
-    # kernel = np.ones((5,5),np.uint8)
-
-    # whitedil = cv2.dilate(whiteMask,kernel,iterations = 1)
-    # greydil = cv2.dilate(greyMask,kernel,iterations = 1)
-    #combinedThreshold = cv2.morphologyEx(combinedThreshold, cv2.MORPH_OPEN, kernel)
-    # combinedThreshold = whitedil & greydil
     cv2.imshow("Threshold", frame)			# Display thresholded frame
-    cv2.imshow("filtered", maskedImage)
+    # cv2.imshow("filtered", maskedImage)
     #cv2.imshow("Original", mask)
     # cv2.imshow("hi", maskedImage)
 
