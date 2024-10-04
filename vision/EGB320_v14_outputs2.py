@@ -14,7 +14,7 @@ class visionSystem:
         self.cap = picamera2.Picamera2()
         self.frameSizeX = 300#820
         self.frameSizeY = 225#616
-        self.minArea = self.frameSizeX*self.frameSizeY / 325
+        self.minArea = int(self.frameSizeX*self.frameSizeY / 400)
         self.currentFrame = np.zeros((self.frameSizeX, self.frameSizeY, 3), np.uint8)
         # frameCount = 0
         config = self.cap.create_video_configuration(main={"format":'XRGB8888',"size":(self.frameSizeX,self.frameSizeY)},
@@ -87,69 +87,49 @@ class visionSystem:
                 filteredContours.append(contour)
         return filteredContours
 
+    def findRangeWidth(self, objectWidthMM, widthPx):
+        range = (self.focalWidthPixels*objectWidthMM) / widthPx
+        return range
 
-    # def items(frameHSV, thresholdVals):
-        # mask = self.threshold(frameHSV, thresholdVals, 255) 
-        # contours = self.contourImage(frame, mask)
+    def findRangeHeight(self, objectHeightMM, heightPx):
+        range = (self.focalHeightPixels*objectHeightMM) / heightPx
+        return range
+
+    def findBearing(self, x, widthPx):
+        objectCentreX = x + (widthPx/2)
+        frameCentreX = self.frameSizeX/2
+        bearing = np.degrees(np.arctan2(objectCentreX - frameCentreX, self.focalWidthPixels))
+        return bearing
+
+    def isCircle(self, contour):
+        area = cv2.contourArea(contour)
+        perimeter = cv2.arcLength(contour, True)
+        circularity = (4 * np.pi * area) / (perimeter**2)
+        if (0.8 < circularity < 1.2):# Check for circle
+            #is a circle
+            return True
+        else:
+            return False
         
-        # contoursFiltered = []
-        # outputRB = []
-        # # bottles = []
-        # # balls = []
-        # # cubes = []
-        # # cups = []
-        # # rects = []
-        # # bowls = []
-        # for contour in contours:
-        #     x,y,w,h = cv2.boundingRect(contour)
-        #     if (y+h) > wallHeight:
-        #         contoursFiltered.append(contour)
-            
+    def isSquare(self, contour):
+        epsilon = 0.02 * cv2.arcLength(contour, True)
+        approx = cv2.approxPolyDP(contour, epsilon, True)
 
-        #         itemType, itemHeightMM = "item", 45 #findItemType(contour, w, h)
+        # Check if the approximated contour has 4 vertices and is close to square-shaped
+        if len(approx) == 4:
+            x,y,w,h = cv2.boundingRect(approx)
+            aspectRatio = w / float(h)
 
-        #         range = self.findRangeHeight(itemHeightMM, h)
-        #         bearing = self.findBearing(x, w)
+            if 0.60 <= aspectRatio <= 1.40:  # Check if aspect ratio is close to 1 (square)
+                #print("Contour is a square.")
+                return True, x,y,w,h
+            else:
+                #print("Contour is not a square (aspect ratio is off).")
+                return False, x,y,w,h
+        else:
+            #print("Contour is not a square (does not have 4 vertices).")
+            return False, 0, 0, 0, 0
 
-        #         if x < 2:
-        #             xText = 2
-        #         else:
-        #             xText = x
-        #         if y < 35:
-        #             yText = 25
-        #         else:
-        #             yText = y - 10
-
-        #         cv2.putText(frame, f"{itemType}, {range:.0f}mm, {bearing:.1f}*", (xText,yText), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,0), 1)
-        #         outputRB.append((range, bearing))
-        #         # if itemType == "bottle":
-        #         #     bottles.append((range, bearing))
-        #         # elif itemType == "ball":
-        #         #     balls.append((range, bearing))
-        #         # elif itemType == "cube":
-        #         #     cubes.append((range, bearing))
-        #         # elif itemType == "cup":
-        #         #     cups.append((range, bearing))
-        #         # elif itemType == "rect":
-        #         #     rects.append((range, bearing))
-        #         # elif itemType == "bowl":
-        #         #     bowls.append((range, bearing))
-        # # if bottles == []:
-        # #     bottles = None
-        # # if balls == []:
-        # #     balls = None
-        # # if cubes == []:
-        # #     cubes = None
-        # # if cups == []:
-        # #     cups = None
-        # # if rects == []:
-        # #     rects = None
-        # # if bowls == []:
-        # #     bowls = None
-        
-        # # outputRB = [bottles, balls, cubes, cups, rects, bowls]
-        # cv2.drawContours(frame, contoursFiltered, -1, (0,255,0), 1)
-        # return outputRB
 
     def rowMarker(self, writeFrame, frameHSV, thresholdVals):
         outputRB = [None, None, None]
@@ -202,8 +182,7 @@ class visionSystem:
             #     return (None, outputRB, None)
             # elif circleCount == 3:
             #     return (None, None, outputRB)
-                
-
+          
     def obstacle(self, writeFrame, frame, thresholdVals):
         mask = self.threshold(frame, thresholdVals, 255)
         if cv2.countNonZero(mask) > self.minArea:
@@ -274,10 +253,6 @@ class visionSystem:
         else:
             outputRB = None
         return writeFrame, outputRB
-
-    # def sortBearingLtoR(self, RB):
-    #     RB.sort(key = lambda x: x[1])
-    #     return RB
 
     def packingBay(self, writeFrame, frame, threshValsSquare, threshValsYel):
         outputRB = [None, None]
@@ -364,73 +339,8 @@ class visionSystem:
 
         cv2.waitKey(1)
         return outputRB
-
-        
-
-    def findRangeWidth(self, objectWidthMM, widthPx):
-        range = (self.focalWidthPixels*objectWidthMM) / widthPx
-        return range
-
-    def findRangeHeight(self, objectHeightMM, heightPx):
-        range = (self.focalHeightPixels*objectHeightMM) / heightPx
-        return range
-
-    def findBearing(self, x, widthPx):
-        objectCentreX = x + (widthPx/2)
-        frameCentreX = self.frameSizeX/2
-        bearing = np.degrees(np.arctan2(objectCentreX - frameCentreX, self.focalWidthPixels))
-        return bearing
-
-    def isCircle(self, contour):
-        area = cv2.contourArea(contour)
-        perimeter = cv2.arcLength(contour, True)
-        circularity = (4 * np.pi * area) / (perimeter**2)
-        if (0.8 < circularity < 1.2):# Check for circle
-            #is a circle
-            return True
-        else:
-            return False
-        
-    def isSquare(self, contour):
-        epsilon = 0.02 * cv2.arcLength(contour, True)
-        approx = cv2.approxPolyDP(contour, epsilon, True)
-
-        # Check if the approximated contour has 4 vertices and is close to square-shaped
-        if len(approx) == 4:
-            x,y,w,h = cv2.boundingRect(approx)
-            aspectRatio = w / float(h)
-
-            if 0.60 <= aspectRatio <= 1.40:  # Check if aspect ratio is close to 1 (square)
-                #print("Contour is a square.")
-                return True, x,y,w,h
-            else:
-                #print("Contour is not a square (aspect ratio is off).")
-                return False, x,y,w,h
-        else:
-            #print("Contour is not a square (does not have 4 vertices).")
-            return False, 0, 0, 0, 0
             
-    # def findItemType(contour, w, h):
-    #     # Aspect Ratios: bottle=0.25, ball=1, cube=1, cup=1.24, rect=1.44, bowl=2.15
-    #     # Heights: bottle=72, ball=47, cube=38, cup=42, rect=45, bowl=26
-    #     aspectRatio = w / h
-    #     if aspectRatio < 0.5:
-    #         return "bottle", 72
-    #     elif (0.8 < aspectRatio) & (aspectRatio < 1.1):
-    #         #ball or cube
-    #         if self.isCircle(contour) == True:
-    #             return "ball", 47
-    #         else:
-    #             return "cube", 38
-    #     elif (1.1 < aspectRatio) & (aspectRatio < 1.34):
-    #         return "cup", 42
-    #     elif (1.34 < aspectRatio) & (aspectRatio < 1.8):
-    #         return "rect", 45
-    #     elif (aspectRatio > 1.8):
-    #         return "bowl", 26
-    #     else:
-    #         return "unknown", 45 #45mm is average height
-        
+  
     def captureImage(self):
         while(1):
             #print("Capturing Image")
@@ -447,7 +357,11 @@ globalFrame = np.zeros((vision_system.frameSizeX, vision_system.frameSizeY, 3), 
 
 while(1):
     __ = vision_system.GetDetectedObjects()
-    # startTime = time.time()
+
+vision_system.cap.close()
+cv2.destroyAllWindows()
+
+# startTime = time.time()
     # # vision_system.cap.start()
     # # vision_system.captureImage()
     # self.currentFrame = vision_system.currentFrame
@@ -506,5 +420,93 @@ while(1):
 
     # cv2.waitKey(1)									# Exit on keypress
 
-vision_system.cap.close()
-cv2.destroyAllWindows()
+
+
+
+
+
+
+    # def items(frameHSV, thresholdVals):
+        # mask = self.threshold(frameHSV, thresholdVals, 255) 
+        # contours = self.contourImage(frame, mask)
+        
+        # contoursFiltered = []
+        # outputRB = []
+        # # bottles = []
+        # # balls = []
+        # # cubes = []
+        # # cups = []
+        # # rects = []
+        # # bowls = []
+        # for contour in contours:
+        #     x,y,w,h = cv2.boundingRect(contour)
+        #     if (y+h) > wallHeight:
+        #         contoursFiltered.append(contour)
+            
+
+        #         itemType, itemHeightMM = "item", 45 #findItemType(contour, w, h)
+
+        #         range = self.findRangeHeight(itemHeightMM, h)
+        #         bearing = self.findBearing(x, w)
+
+        #         if x < 2:
+        #             xText = 2
+        #         else:
+        #             xText = x
+        #         if y < 35:
+        #             yText = 25
+        #         else:
+        #             yText = y - 10
+
+        #         cv2.putText(frame, f"{itemType}, {range:.0f}mm, {bearing:.1f}*", (xText,yText), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,0), 1)
+        #         outputRB.append((range, bearing))
+        #         # if itemType == "bottle":
+        #         #     bottles.append((range, bearing))
+        #         # elif itemType == "ball":
+        #         #     balls.append((range, bearing))
+        #         # elif itemType == "cube":
+        #         #     cubes.append((range, bearing))
+        #         # elif itemType == "cup":
+        #         #     cups.append((range, bearing))
+        #         # elif itemType == "rect":
+        #         #     rects.append((range, bearing))
+        #         # elif itemType == "bowl":
+        #         #     bowls.append((range, bearing))
+        # # if bottles == []:
+        # #     bottles = None
+        # # if balls == []:
+        # #     balls = None
+        # # if cubes == []:
+        # #     cubes = None
+        # # if cups == []:
+        # #     cups = None
+        # # if rects == []:
+        # #     rects = None
+        # # if bowls == []:
+        # #     bowls = None
+        
+        # # outputRB = [bottles, balls, cubes, cups, rects, bowls]
+        # cv2.drawContours(frame, contoursFiltered, -1, (0,255,0), 1)
+        # return outputRB
+
+
+  # def findItemType(contour, w, h):
+    #     # Aspect Ratios: bottle=0.25, ball=1, cube=1, cup=1.24, rect=1.44, bowl=2.15
+    #     # Heights: bottle=72, ball=47, cube=38, cup=42, rect=45, bowl=26
+    #     aspectRatio = w / h
+    #     if aspectRatio < 0.5:
+    #         return "bottle", 72
+    #     elif (0.8 < aspectRatio) & (aspectRatio < 1.1):
+    #         #ball or cube
+    #         if self.isCircle(contour) == True:
+    #             return "ball", 47
+    #         else:
+    #             return "cube", 38
+    #     elif (1.1 < aspectRatio) & (aspectRatio < 1.34):
+    #         return "cup", 42
+    #     elif (1.34 < aspectRatio) & (aspectRatio < 1.8):
+    #         return "rect", 45
+    #     elif (aspectRatio > 1.8):
+    #         return "bowl", 26
+    #     else:
+    #         return "unknown", 45 #45mm is average height
