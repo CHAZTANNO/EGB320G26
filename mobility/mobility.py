@@ -38,10 +38,10 @@ def SetTargetVelocities(x_dot, theta_dot):
         return
 
     # Parameters based on motor and robot specs
-    wheel_base = 0.15  # meters
+    wheel_base = 0.135  # meters
     wheel_diameter = 0.039  # meters
     max_motor_rpm = 240  # Loaded RPM
-    max_motor_output = 100  # Motor output range is 0-100
+    max_motor_output = 60  # Motor output range is 0-100
     
     left_wheel_speed = x_dot - (theta_dot * wheel_base) / 2
     right_wheel_speed = x_dot + (theta_dot * wheel_base) / 2
