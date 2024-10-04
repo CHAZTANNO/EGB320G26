@@ -36,14 +36,11 @@ try:
         # Capture the frame
         frame = cap.capture_array()
         
-        # Convert XRGB to BGR format
-        frame_bgr = cv2.cvtColor(frame, cv2.COLOR_XRGB2BGR)
-        
         # Write the frame to the video file
-        out.write(frame_bgr)
+        out.write(frame)
         
         # Show the frame on the screen (optional)
-        cv2.imshow("Recording", frame_bgr)
+        cv2.imshow("Recording", frame)
         
         # Exit if 'q' is pressed
         if cv2.waitKey(1) & 0xFF == ord('q'):
