@@ -82,9 +82,9 @@ def bringliftdown():
 if __name__ == "__main__":
     try:
         # Test collecting an item from the middle shelf (shelf level 1)
-        #collect_item(1)
-        #time.sleep(3)  # Simulate time before dropping the item
-        #drop_item()  # Drop the item
+        collect_item(1)
+        time.sleep(3)  # Simulate time before dropping the item
+        drop_item()  # Drop the item
         bringliftdown()
         
     finally:
