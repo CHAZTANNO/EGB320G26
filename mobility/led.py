@@ -20,9 +20,9 @@ def set_LED(LED):
         GPIO.output(led_pins['YELLOW'], GPIO.LOW)
         GPIO.output(led_pins['GREEN'], GPIO.LOW)
     elif LED == 'YELLOW':
-        GPIO.output(led_pins['RED'], GPIO.LOW)
-        GPIO.output(led_pins['YELLOW'], GPIO.HIGH)
-        GPIO.output(led_pins['GREEN'], GPIO.LOW)
+        GPIO.output(led_pins['RED'], GPIO.HIGH)
+        GPIO.output(led_pins['GREEN'], GPIO.HIGH)
+        GPIO.output(led_pins['YELLOW'], GPIO.LOW)
     elif LED == 'GREEN':
         GPIO.output(led_pins['RED'], GPIO.LOW)
         GPIO.output(led_pins['YELLOW'], GPIO.LOW)
