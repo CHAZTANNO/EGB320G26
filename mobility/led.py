@@ -30,11 +30,11 @@ def set_LED(LED):
 
 def test():
     set_LED('RED')  # Set the LED to red
-    sleep(0.5)
+    time.sleep(0.5)
     set_LED('YELLOW')  # Set the LED to yellow
-    sleep(0.5)
+    time.sleep(0.5)
     set_LED('GREEN')  # Set the LED to green
-    sleep(0.5)
+    time.sleep(0.5)
 
 setup()
 test()
