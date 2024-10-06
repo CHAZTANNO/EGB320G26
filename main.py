@@ -6,6 +6,7 @@ from navigation import NavClass as nav
 from navigation import state_machine as sm
 from mobility import mobility as mob
 from mobility import led
+from item_collection import item_collection_code as itemcollection
 
 import random
 import time
@@ -56,7 +57,13 @@ if __name__ == "__main__":
             # ITEM COLLECTION
             # tell it to collect at the objective height if needed
             if navSystem.itemState == 'Collecting':
-                navSystem.itemState = 'Collected' # call nav function @ navSystem.currentObjective.get['height']
+                itemcollection.collect_item(navSystem.currentObjective.get['height'])
+                navSystem.itemState = 'Collected'
+            
+            if navSystem.itemstate == 'Dropping':
+                itemcollection.drop_item()
+                navSystem.itemState = 'Not_Collected'
+                # update objective
 
             packerBotSim.UpdateObjectPositions()
 
