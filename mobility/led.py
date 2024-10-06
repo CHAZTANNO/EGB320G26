@@ -1,4 +1,5 @@
 import RPi.GPIO as GPIO  # Import the GPIO module
+import time
 
 def setup():
     GPIO.setmode(GPIO.BOARD)         # Set the GPIO pin numbering scheme to BOARD
@@ -26,3 +27,16 @@ def set_LED(LED):
         GPIO.output(led_pins['RED'], GPIO.LOW)
         GPIO.output(led_pins['YELLOW'], GPIO.LOW)
         GPIO.output(led_pins['GREEN'], GPIO.HIGH)
+
+def test():
+    set_LED('RED')  # Set the LED to red
+    sleep(0.5)
+    set_LED('YELLOW')  # Set the LED to yellow
+    sleep(0.5)
+    set_LED('GREEN')  # Set the LED to green
+    sleep(0.5)
+
+setup()
+test()
+
+
