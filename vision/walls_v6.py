@@ -3,13 +3,20 @@ import picamera2
 import cv2
 import numpy as np
 import math
+from pprint import *
 
 cap = picamera2.Picamera2()
-config = cap.create_video_configuration(main={"format":'XRGB8888',"size":(820,616)})
+frameSizeX = 300#820
+frameSizeY = 225#616
+minArea = int(frameSizeX*frameSizeY / 400)
+currentFrame = np.zeros((frameSizeX, frameSizeY, 3), np.uint8)
+config = cap.create_video_configuration(main={"format":'XRGB8888',"size":(frameSizeX,frameSizeY)},
+                                        controls={'FrameRate': 50},
+                                        raw={'size': (1640, 1232)})
+
+pprint(cap.sensor_modes)                                        
 cap.configure(config)
 cap.set_controls({"ExposureTime": 200000, "AnalogueGain": 1.2, "ColourGains": (1.4,1.5)})
-
-
 cap.start()
 
 def threshold(frame, thresholds):
@@ -43,7 +50,7 @@ def contourImage(mask):
             filteredContours.append(contour)
     return filteredContours
 
-def walls(frame, thresholdVals):
+def GetDetectedWallPoints(frame, thresholdVals):
     height, width = frame.shape[:2]
 
     # Create a mask with the same size as the image (bottom half set to 255, top half set to 0)
@@ -65,66 +72,87 @@ def walls(frame, thresholdVals):
     expandedMask = cv2.erode(opening, erodeKernel, iterations=1)
 
     edges = cv2.Canny(opening, 50, 150)
-    lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=40, minLineLength=20, maxLineGap=80)
+    lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=40, minLineLength=50, maxLineGap=80)
     cv2.imshow("edges", edges)
 
     min_height = height
     wallLine = None
+    pointCount = 0
+    midx = 0
+    midy = 0
     if lines is not None:
-        x1, y1, x2, y2 = line[0]
-        cv2.line(frameGlobal, (x1, y1), (x2, y2), (0, 255, 255), 2)
+        # x1, y1, x2, y2 = line[0]
+        # cv2.line(frameGlobal, (x1, y1), (x2, y2), (0, 255, 255), 2)
         mergedLines = process_lines(lines, min_distance=10, min_angle=5)
         
         for line in mergedLines:
             x1, y1, x2, y2 = line[0]
             xAvg = int((x1+x2)/2)
             yAvg = int((y1+y2)/2)
-            cv2.line(frameGlobal, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            if (expandedMask[yAvg, xAvg] != 0) and  (y1 > height/2+5) and (yAvg < min_height): #((expandedMask[y1,x1] == 0) or (x1 < 40) or (x1 > width-40)) and ((expandedMask[y2,x2] == 0) or (x2 < 40) or (x2 > width-40))
-                min_height = yAvg
-                wallLine = (x1, y1, x2, y2)
-
-        # Draw the highest line
-        if wallLine is not None:
-            x1, y1, x2, y2 = wallLine
-            cv2.circle(frameGlobal, (x1,y1), 10, (255,0,255), -1)
-            cv2.circle(frameGlobal, (x2,y2), 10, (255,255,0), -1)
-
-    cv2.imshow('frame', frameGlobal)
-
-    # contours, heirarchy = cv2.findContours(opening, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    # for contour in contours:
-    #     area = cv2.contourArea(contour)
-    #     if area > 400:
-    #         cv2.drawContours(frameGlobal, [contour], 0, (0, 0, 255), 2)
-    # cv2.imshow("frame", frameGlobal)
+            # cv2.line(frameGlobal, (x1, y1), (x2, y2), (0, 0, 255), 2)
+            # if (expandedMask[yAvg, xAvg] != 0) and  (y1 > height/2+5) and (yAvg < min_height): #((expandedMask[y1,x1] == 0) or (x1 < 40) or (x1 > width-40)) and ((expandedMask[y2,x2] == 0) or (x2 < 40) or (x2 > width-40))
+            #     min_height = yAvg
+            #     wallLine = (x1, y1, x2, y2)
             
-    # whiteMask = cv2.erode(whiteMask, largeKernel, iterations=1)
-    # mask = maskBottomOnly & whiteMask
-    
-    # expandedMask = cv2.erode(mask, largeKernel, iterations=1)
-    # maskedImage = cv2.bitwise_and(frame, frame, mask= mask)
+            angleDeg = math.degrees(math.atan2(y2 - y1, x2 - x1))
+            if angleDeg < 0:
+                angleDeg += 180
+            if ((angleDeg < 80) or (angleDeg > 100)) and (y1 > height/2+5) and (yAvg < min_height): #((expandedMask[y1,x1] == 0) or (x1 < 40) or (x1 > width-40)) and ((expandedMask[y2,x2] == 0) or (x2 < 40) or (x2 > width-40)) #(expandedMask[yAvg, xAvg] != 0) and  
+                min_height = yAvg
+                if (angleDeg < 10) or (angleDeg > 170): #not head on, one point only
+                    pointCount = 1
+                    midx = xAvg
+                    midy = yAvg
+                else:
+                    pointCount = 2
+                    wallLine = (x1, y1, x2, y2)
 
-    # blurred = cv2.GaussianBlur(maskedImage, (19, 19), 0)
-    # blurred = cv2.GaussianBlur(blurred, (15, 15), 0)
-    # blurred = cv2.GaussianBlur(blurred, (19, 19), 0)
-    # cv2.imshow("gau", blurred)
+    # Draw the highest line
+    if pointCount == 1:
+        cv2.circle(frameGlobal, (midx,midy), 10, (0,255,255), -1)
+        rangeMid = findRangeWall(midy)
+        bearingMid = findBearing(midx, 1)
+        outputRB = [[rangeMid, bearingMid], None, None]
+    elif pointCount == 2:
+        x1, y1, x2, y2 = wallLine
+        cv2.circle(frameGlobal, (x1,y1), 10, (255,0,255), -1)
+        cv2.circle(frameGlobal, (x2,y2), 10, (255,255,0), -1)
+        range1 = findRangeWall(y1)
+        range2 = findRangeWall(y1)
+        bearing1 = findBearing(x1, 1)
+        bearing2 = findBearing(x2,1)
+        outputRB = [[range1, bearing1], None, [range2, bearing2]]
+    else:
+        outputRB = [None, None, None]
+        
+    cv2.imshow('frame', frameGlobal)
+    return outputRB
 
 
-    # filtered_image = cv2.bilateralFilter(maskedImage, d=9, sigmaColor=150, sigmaSpace=150)
-    # cv2.imshow("bila", filtered_image)
+def findRangeWall(y):
+    range = 0
+    if y > frameSizeX - 10:
+        range = 0
+    elif (frameSizeX - 20) < y < (frameSizeX - 30):
+        range = 0
 
-    # maskedImage = blurred
 
-    # edges = cv2.Canny(maskedImage, 10, 15)
-    # # cv2.imshow("edges", edges)
-    # lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=50, minLineLength=20, maxLineGap=80)
-    # # ^outputs (x1, y1, x2, y2) which are start and end coords of (straight) lines
-    
 
-    # 
-    # 
+
+
+focalLengthMM = 3.04
+sensorWidthMM = 3.68
+sensorHeightMM = 2.76
+focalWidthPixels = focalLengthMM*frameSizeX / sensorWidthMM #focal length in pixels with specific resolution (not frame size)
+# focalHeightPixels = focalLengthMM*frameSizeY / sensorHeightMM
+def findBearing(x, widthPx):
+    objectCentreX = x + (widthPx/2)
+    frameCentreX = frameSizeX/2
+    bearing = np.degrees(np.arctan2(objectCentreX - frameCentreX, focalWidthPixels))
+    return bearing
+   
+
+
 def get_orientation(line):
     orientation = math.atan2(abs((line[3] - line[1])), abs((line[2] - line[0])))
     return math.degrees(orientation)
@@ -225,11 +253,11 @@ while(1):
     
     wallThreshold = [2, 42, 0, 70, 150, 232]
     wallThreshold2 = [2, 63, 6, 70, 118, 221]
-    wallThreshold3 = [2, 75, 0, 85, 163, 255]
+    wallThreshold3 = [20, 65, 15, 70, 163, 255]
 
     greyThreshold = [19, 63, 6, 66, 118, 205]
 
-    walls(frameHSV, wallThreshold3)
+    GetDetectedWallPoints(frameHSV, wallThreshold3)
 
 
     # cv2.imshow("Threshold", frameGlobal)			# Display thresholded frame

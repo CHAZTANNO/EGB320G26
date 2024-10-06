@@ -2,6 +2,7 @@ import time
 import picamera2
 import cv2
 import numpy as np
+import math
 
 cap = picamera2.Picamera2()
 config = cap.create_video_configuration(main={"format":'XRGB8888',"size":(820,616)})
@@ -77,7 +78,10 @@ def walls(frame, thresholdVals):
             xAvg = int((x1+x2)/2)
             yAvg = int((y1+y2)/2)
             cv2.line(frameGlobal, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            if (expandedMask[yAvg, xAvg] != 0) and  (y1 > height/2+5) and (yAvg < min_height): #((expandedMask[y1,x1] == 0) or (x1 < 40) or (x1 > width-40)) and ((expandedMask[y2,x2] == 0) or (x2 < 40) or (x2 > width-40))
+            angleDeg = math.degrees(math.atan2(y2 - y1, x2 - x1))
+            if angleDeg < 0:
+                angleDeg += 180
+            if ((angleDeg < 80) or (angleDeg > 100)) and (y1 > height/2+5) and (yAvg < min_height): #((expandedMask[y1,x1] == 0) or (x1 < 40) or (x1 > width-40)) and ((expandedMask[y2,x2] == 0) or (x2 < 40) or (x2 > width-40)) #(expandedMask[yAvg, xAvg] != 0) and  
                 min_height = yAvg
                 wallLine = (x1, y1, x2, y2)
 

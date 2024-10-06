@@ -41,9 +41,9 @@ class visionSystem:
         self.blueThreshold = [97, 120, 80, 255, 0, 190]
         self.orangeThreshold = [0, 21, 161, 255, 71, 255]
         self.yellowThreshold = [21, 35, 190, 255, 190, 255]
-        self.greenThreshold = [38, 90, 60, 210, 15, 135]
-        self.blackThreshold = [5, 60, 0, 160, 0, 120]
-        self.squareThreshold = [16, 38, 50, 140, 40, 140]
+        self.greenThreshold = [38, 90, 70, 210, 35, 105]
+        self.blackThreshold = [10, 80, 0, 140, 0, 100]
+        self.squareThreshold = [16, 38, 50, 140, 40, 120]
 
 
     def threshold(self, frame, thresholds, trueValue):
@@ -153,29 +153,10 @@ class visionSystem:
                 minX = np.min(xs)
                 minY = np.min(ys)
                 cv2.putText(writeFrame, f"R{circleCount} {meanRange:.0f} {meanBearing:.1f}", (minX,minY-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,0,255), 1)
-                RB = [meanRange, meanBearing]
+                RB = [(meanRange/1000), math.radians(meanBearing)]
                 outputRB[circleCount-1] = RB
         
         return writeFrame, outputRB
-            
-
-            # if minX < 2:
-            #     xText = 2
-            # else:
-            #     xText = minX
-            # if minY < 35:
-            #     yText = 25
-            # else:
-            #     yText = minY - 10
-            # xText,yText
-                
-            # outputRB = [meanRange, meanBearing]
-            # if circleCount == 1:
-            #     return (outputRB, None, None)
-            # elif circleCount == 2:
-            #     return (None, outputRB, None)
-            # elif circleCount == 3:
-            #     return (None, None, outputRB)
           
     def obstacle(self, writeFrame, frame, thresholdVals):
         mask = self.threshold(frame, thresholdVals, 255)
@@ -198,17 +179,8 @@ class visionSystem:
 
                 bearing = self.findBearing(x, w)
 
-                outputRB.append((range, bearing))
-
-                # if x < 2:
-                #     xText = 2
-                # else:
-                #     xText = x
-                # if y < 35:
-                #     yText = 25
-                # else:
-                #     yText = y - 10
                 cv2.putText(writeFrame, f"O {range:.0f} {bearing:.1f}", (x,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255,0,255), 1)
+                outputRB.append(((range/1000), math.radians(bearing)))
             
             cv2.drawContours(writeFrame, contours, -1, (255,0,255), 1)
         else:
@@ -218,57 +190,45 @@ class visionSystem:
     def shelves(self, writeFrame, frame, thresholdVals):
         mask = self.threshold(frame, thresholdVals, 255)
         splitMask = mask
-        edges = cv2.Canny(mask, 50, 150)
-        lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=40, minLineLength=20, maxLineGap=50)
-
-        if lines is not None:
-            for line in lines:
-                x1, y1, x2, y2 = line[0]
-                # Calculate the angle in radians
-                angleDeg = math.degrees(math.atan2(y2 - y1, x2 - x1))
-                cv2.line(writeFrame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-                if angleDeg < 0:
-                    angleDeg += 180
-                if 70 < angleDeg < 110: #verticalish
-                    avgx = int((x1+x2)/2) #split the image here
-                    splitMask[:, avgx-7:avgx+7] = 0
 
 
-            if cv2.countNonZero(splitMask) > self.minArea:
-                contours = self.contourImage(splitMask)
+        if cv2.countNonZero(mask) > self.minArea:
+            edges = cv2.Canny(mask, 50, 150)
+            lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=40, minLineLength=20, maxLineGap=50)
 
-                outputRB = []
-                for contour in contours:
-                    x,y,w,h = cv2.boundingRect(contour)
+            if lines is not None:
+                for line in lines:
+                    x1, y1, x2, y2 = line[0]
+                    # Calculate the angle in radians
+                    angleDeg = math.degrees(math.atan2(y2 - y1, x2 - x1))
+                    cv2.line(writeFrame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                    if angleDeg < 0:
+                        angleDeg += 180
+                    if 70 < angleDeg < 110: #verticalish
+                        avgx = int((x1+x2)/2) #split the image here
+                        splitMask[:, avgx-7:avgx+7] = 0
                     
-                    # if (h >= (0.95*frameSizeY)) | (y<20) | (y+h > 596): #Obstacle is too close to use height, use ultrasonic instead
-                    #     range = self.findRangeHeight(312, h) # future: ultrasonicDistance()
-                    # else:
-                    #     range = self.findRangeHeight(312, h)
-                    range = self.findRangeHeight(312, h)
-                    bearing = self.findBearing(x, w)
-                    outputRB.append((range, bearing))
+            contours = self.contourImage(splitMask)
 
-                    # if x < 2:
-                    #     xText = 2
-                    # else:
-                    #     xText = x
-                    # if y < 35:
-                    #     yText = 25
-                    # else:
-                    #     yText = y - 10
-                    cv2.putText(writeFrame, f"S {range:.0f} {bearing:.1f}", (x,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1)
+            outputRB = []
+            for contour in contours:
+                x,y,w,h = cv2.boundingRect(contour)
                 
-                cv2.drawContours(writeFrame, contours, -1, (0,255,0), 1)
-                outputRB = outputRB.sort(key = lambda x: x[1]) #self.sortBearingLtoR(outputRB) #sort by bearing, left to right
-            else:
-                outputRB = None
+                range = self.findRangeHeight(312, h)
+                bearing = self.findBearing(x, w)
+                cv2.putText(writeFrame, f"S {range:.0f} {bearing:.1f}", (x,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1)
+                outputRB.append(((range/1000), math.radians(bearing)))
+            
+            cv2.drawContours(writeFrame, contours, -1, (0,255,0), 1)
+            # outputRB = outputRB.sort(key = lambda x: x[1]) #self.sortBearingLtoR(outputRB) #sort by bearing, left to right
+            outputRB = sorted(outputRB, key=lambda x: x[1])
         else:
             outputRB = None
+
         return writeFrame, outputRB
 
     def packingBay(self, writeFrame, frame, threshValsSquare, threshValsYel):
-        outputRB = [None, None]
+        outputRB = None
         usefulContour = []
         usefulX, usefulY = 0, 0
         squareCount = 0
@@ -304,13 +264,55 @@ class visionSystem:
                     bearing = self.findBearing(x, w)
                     usefulX = x
                     usefulY = y
-                    #print("Found Yellow! R: " + str(range) + " B: " + str(bearing))
         if len(usefulContour) > 0: #usefulContour has a value - something was identified
             cv2.drawContours(writeFrame, [usefulContour], 0, (173, 13, 106), 1)
             cv2.putText(writeFrame, f"PB {range:.0f} {bearing:.1f}", (usefulX,usefulY-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (173, 13, 106), 1)
-            outputRB = [range, bearing]
+            outputRB = [(range/1000), math.radians(bearing)]
 
         return writeFrame, outputRB
+
+    def items(self, writeFrame, frame, thresholdVals):
+        mask = self.threshold(frame, thresholdVals, 255) 
+        outputRB = []
+        if cv2.countNonZero(mask) > self.minArea:
+            contours = self.contourImage(mask)
+            cv2.drawContours(writeFrame, contours, -1, (0,255,0), 1)
+            for contour in contours:
+                x,y,w,h = cv2.boundingRect(contour)
+
+                itemType, itemHeightMM = self.findItemType(contour, w, h) #"item", 45 
+
+                rangeI = self.findRangeHeight(itemHeightMM, h)
+                bearing = self.findBearing(x, w)
+
+                cv2.putText(writeFrame, f"I {rangeI:.0f} {bearing:.1f}", (x,y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0,255,0), 1)
+                outputRB.append(((rangeI/1000), math.radians(bearing)))
+        
+        if len(outputRB) <= 0:
+            outputRB = None
+        return writeFrame, outputRB
+
+
+    def findItemType(self, contour, w, h):
+        # Aspect Ratios: bottle=0.25, ball=1, cube=1, cup=1.24, rect=1.44, bowl=2.15
+        # Heights: bottle=72, ball=47, cube=38, cup=42, rect=45, bowl=26
+        aspectRatio = w / h
+        if aspectRatio < 0.5:
+            return "bottle", 72
+        elif (0.8 < aspectRatio) & (aspectRatio < 1.1):
+            #ball or cube
+            if self.isCircle(contour) == True:
+                return "ball", 47
+            else:
+                return "cube", 38
+        elif (1.1 < aspectRatio) & (aspectRatio < 1.34):
+            return "cup", 42
+        elif (1.34 < aspectRatio) & (aspectRatio < 1.8):
+            return "rect", 45
+        elif (aspectRatio > 1.8):
+            return "bowl", 26
+        else:
+            return "unknown", 45 #45mm is average height
 
 
     def GetDetectedObjects(self):
@@ -321,7 +323,7 @@ class visionSystem:
         frameHSV = cv2.cvtColor(globalFrame, cv2.COLOR_BGR2HSV) 
 
         #items
-        itemsRB = [None, None, None, None, None, None]
+        globalFrame, itemsRB = self.items(globalFrame, frameHSV, self.orangeThreshold)
 
         #packing bay
         globalFrame, packingBayRB = self.packingBay(globalFrame, frameHSV, self.squareThreshold, self.yellowThreshold)
@@ -439,87 +441,4 @@ cv2.destroyAllWindows()
 
 
 
-    # def items(frameHSV, thresholdVals):
-        # mask = self.threshold(frameHSV, thresholdVals, 255) 
-        # contours = self.contourImage(frame, mask)
-        
-        # contoursFiltered = []
-        # outputRB = []
-        # # bottles = []
-        # # balls = []
-        # # cubes = []
-        # # cups = []
-        # # rects = []
-        # # bowls = []
-        # for contour in contours:
-        #     x,y,w,h = cv2.boundingRect(contour)
-        #     if (y+h) > wallHeight:
-        #         contoursFiltered.append(contour)
-            
-
-        #         itemType, itemHeightMM = "item", 45 #findItemType(contour, w, h)
-
-        #         range = self.findRangeHeight(itemHeightMM, h)
-        #         bearing = self.findBearing(x, w)
-
-        #         if x < 2:
-        #             xText = 2
-        #         else:
-        #             xText = x
-        #         if y < 35:
-        #             yText = 25
-        #         else:
-        #             yText = y - 10
-
-        #         cv2.putText(frame, f"{itemType}, {range:.0f}mm, {bearing:.1f}*", (xText,yText), cv2.FONT_HERSHEY_SIMPLEX, 0.3, (0,255,0), 1)
-        #         outputRB.append((range, bearing))
-        #         # if itemType == "bottle":
-        #         #     bottles.append((range, bearing))
-        #         # elif itemType == "ball":
-        #         #     balls.append((range, bearing))
-        #         # elif itemType == "cube":
-        #         #     cubes.append((range, bearing))
-        #         # elif itemType == "cup":
-        #         #     cups.append((range, bearing))
-        #         # elif itemType == "rect":
-        #         #     rects.append((range, bearing))
-        #         # elif itemType == "bowl":
-        #         #     bowls.append((range, bearing))
-        # # if bottles == []:
-        # #     bottles = None
-        # # if balls == []:
-        # #     balls = None
-        # # if cubes == []:
-        # #     cubes = None
-        # # if cups == []:
-        # #     cups = None
-        # # if rects == []:
-        # #     rects = None
-        # # if bowls == []:
-        # #     bowls = None
-        
-        # # outputRB = [bottles, balls, cubes, cups, rects, bowls]
-        # cv2.drawContours(frame, contoursFiltered, -1, (0,255,0), 1)
-        # return outputRB
-
-
-  # def findItemType(contour, w, h):
-    #     # Aspect Ratios: bottle=0.25, ball=1, cube=1, cup=1.24, rect=1.44, bowl=2.15
-    #     # Heights: bottle=72, ball=47, cube=38, cup=42, rect=45, bowl=26
-    #     aspectRatio = w / h
-    #     if aspectRatio < 0.5:
-    #         return "bottle", 72
-    #     elif (0.8 < aspectRatio) & (aspectRatio < 1.1):
-    #         #ball or cube
-    #         if self.isCircle(contour) == True:
-    #             return "ball", 47
-    #         else:
-    #             return "cube", 38
-    #     elif (1.1 < aspectRatio) & (aspectRatio < 1.34):
-    #         return "cup", 42
-    #     elif (1.34 < aspectRatio) & (aspectRatio < 1.8):
-    #         return "rect", 45
-    #     elif (aspectRatio > 1.8):
-    #         return "bowl", 26
-    #     else:
-    #         return "unknown", 45 #45mm is average height
+    
