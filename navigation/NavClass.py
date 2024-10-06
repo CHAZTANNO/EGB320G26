@@ -21,8 +21,8 @@ class NavClass:
         self.itemState = 'Not_Collected'
 
         # set max values
-        self.max_forward_vel = 0.04
-        self.max_rot_vel = 0.07
+        self.max_forward_vel = 1 #0.04
+        self.max_rot_vel = 0.5 #0.07
 
         self.dataDict = {
             'itemsRB': [],
