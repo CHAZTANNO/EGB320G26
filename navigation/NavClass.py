@@ -20,6 +20,10 @@ class NavClass:
         self.LEDstate = 'RED'
         self.itemState = 'Not_Collected'
 
+        # set max values
+        self.max_forward_vel = 0.04
+        self.max_rot_vel = 0.07
+
         self.dataDict = {
             'itemsRB': [],
             'packingBayRB': [],
@@ -85,11 +89,11 @@ class NavClass:
             attractive_f.append(self.attraction_calculation(self.dataDict['packingBayRB'], 1))
         
             # drive towards packingbay
-            self.forward_vel, self.rot_vel = self.calculate_resultant_velocity(attractive_f, repulsive_f)
+            self.forward_vel, self.rot_vel = self.normalise_velocity(self.calculate_resultant_velocity(attractive_f, repulsive_f))
         
         elif state == 'explorationState':
             self.forward_vel = 0
-            self.rot_vel = -0.5
+            self.rot_vel = -self.max_rot_vel
         
         elif state == 'searchState':
             # what is attractive in this state
@@ -98,7 +102,7 @@ class NavClass:
             attractive_f, repulsive_f = self.field_force_calculator(attractors)
             attractive_f.append(self.attraction_calculation(self.rowEstimation[0], 1))
             # drive towards desired row estimation using potential fields
-            self.forward_vel, self.rot_vel = self.calculate_resultant_velocity(attractive_f, repulsive_f)
+            self.forward_vel, self.rot_vel = self.normalise_velocity(self.calculate_resultant_velocity(attractive_f, repulsive_f))
         
         elif state == 'movingDownRowState':
             # self.forward_vel, self.rot_vel = self.potential_fields()
@@ -106,23 +110,23 @@ class NavClass:
             # calculate forces
             attractive_f, repulsive_f = self.field_force_calculator(attractors)
             # drive towards desired row marker using potential fields
-            self.forward_vel, self.rot_vel = self.calculate_resultant_velocity(attractive_f, repulsive_f)
+            self.forward_vel, self.rot_vel = self.normalise_velocity(self.calculate_resultant_velocity(attractive_f, repulsive_f))
         
         elif state == 'lostInRowState':
             # spin in a circle
             self.forward_vel = 0
-            self.rot_vel = -0.5
+            self.rot_vel = -self.max_rot_vel
         
         elif state == 'movingToBayState':
             # back out of the row
-            self.forward_vel, self.rot_vel = self.back_out_with_virtual_wall()
+            self.forward_vel, self.rot_vel = self.normalise_velocity(self.back_out_with_virtual_wall())
         
         elif state == 'aligningWithBayState':
             self.forward_vel = 0
             if (self.currentObjective['shelf'] % 2) == 0:
-                self.rot_vel = 0.5
+                self.rot_vel = self.max_rot_vel
             else:
-                self.rot_vel = -0.5
+                self.rot_vel = -self.max_rot_vel
         
         elif state == 'collectItemState':
             self.itemState = 'Collecting'
@@ -134,6 +138,27 @@ class NavClass:
         
         else:
             pass
+
+    def normalise_velocity(self, forward_vel, rot_vel):
+        """
+        Normalizes forward and rotational velocities to ensure they do not exceed the maximum values.
+        
+        :param forward_vel: The forward velocity to normalize.
+        :param rot_vel: The rotational velocity to normalize.
+        :param max_forward_vel: The maximum forward velocity.
+        :param max_rot_vel: The maximum rotational velocity.
+        :return: Normalized forward and rotational velocities.
+        """
+        # Normalize forward velocity
+        if abs(forward_vel) > self.max_forward_vel:
+            forward_vel = self.max_forward_vel * (forward_vel / abs(forward_vel))
+
+        # Normalize rotational velocity
+        if abs(rot_vel) > self.max_rot_vel:
+            rot_vel = self.max_rot_vel * (rot_vel / abs(rot_vel))
+
+        return forward_vel, rot_vel
+
 
     def calculate_midpoint(self, shelves_rb):
         """
