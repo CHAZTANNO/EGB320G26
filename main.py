@@ -26,7 +26,7 @@ robotParameters.driveType = ("differential")
 
 if __name__ == "__main__":
     try:
-        packerBotSim = COPPELIA_WarehouseRobot("131.181.33.240", robotParameters, sceneParameters)
+        packerBotSim = COPPELIA_WarehouseRobot("131.181.33.230", robotParameters, sceneParameters)
         packerBotSim.StartSimulator()
 
         navSystem = nav.NavClass()
