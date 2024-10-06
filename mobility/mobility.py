@@ -2,7 +2,7 @@ from __future__ import print_function
 from math import pi
 import time
 import argparse  # For handling command-line arguments
-from .DFRobot_RaspberryPi_DC_Motor import THIS_BOARD_TYPE, DFRobot_DC_Motor_IIC as Board
+from DFRobot_RaspberryPi_DC_Motor import THIS_BOARD_TYPE, DFRobot_DC_Motor_IIC as Board
 
 if THIS_BOARD_TYPE:
     board = Board(1, 0x10)  # RaspberryPi select bus 1, set address to 0x10
@@ -38,7 +38,7 @@ def SetTargetVelocities(x_dot, theta_dot):
         return
 
     # Parameters based on motor and robot specs
-    wheel_base = 0.135  # meters
+    wheel_base = 0.145  # meters
     wheel_diameter = 0.039  # meters
     max_motor_rpm = 100  # Loaded RPM
     max_motor_output = 100  # Motor output range is 0-100
@@ -136,7 +136,7 @@ if __name__ == "__main__":
     print("board begin success")
 
     board.set_encoder_enable(board.ALL)
-    board.set_encoder_reduction_ratio(board.ALL, 100)
+    board.set_encoder_reduction_ratio(board.ALL, 50)
     board.set_moter_pwm_frequency(1000)
 
     # Argument parsing for command-line mode
