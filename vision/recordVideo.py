@@ -1,12 +1,14 @@
 import numpy as np
 import cv2
 from picamera2 import Picamera2
+import stdscr
 
 # Initialize the camera
 cap = Picamera2()
 frameSizeX = 300  # Adjust as needed
 frameSizeY = 225  # Adjust as needed
 currentFrame = np.zeros((frameSizeX, frameSizeY, 3), np.uint8)
+stdscr.getch()
 
 # Create the camera configuration
 config = cap.create_video_configuration(
@@ -19,10 +21,10 @@ cap.configure(config)
 cap.set_controls({"ColourGains": (1.4, 1.5)})
 
 # Save the video in the current working directory
-video_file = "output_video.avi"
+video_file = "output_video.mp4"
 
 # OpenCV video writer to save the video
-fourcc = cv2.VideoWriter_fourcc(*'XVID')
+fourcc = cv2.VideoWriter_fourcc(*'mp4v')
 out = cv2.VideoWriter(video_file, fourcc, 50, (frameSizeX, frameSizeY))
 
 # Start the camera
@@ -39,7 +41,7 @@ while True:
     cv2.imshow("Recording", frame)
 
     # Exit if 'q' is pressed
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    if key == ord('q'):
         break
 
 # Stop the camera and release resources

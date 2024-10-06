@@ -52,6 +52,7 @@ except KeyboardInterrupt:
 finally:
     # Stop the camera and release resources
     cap.stop()
+    cap.save()
     out.release()
     cv2.destroyAllWindows()
     print(f"Recording stopped and saved as '{video_file}'.")
