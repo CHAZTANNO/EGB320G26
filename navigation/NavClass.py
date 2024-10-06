@@ -22,7 +22,7 @@ class NavClass:
 
         # set max values
         self.max_forward_vel = 0.8
-        self.max_rot_vel = 0.5 #0.07
+        self.max_rot_vel = 1 #0.07
 
         self.dataDict = {
             'itemsRB': [],
