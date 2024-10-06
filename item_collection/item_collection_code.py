@@ -81,6 +81,8 @@ def bringliftdown():
 # Testing
 if __name__ == "__main__":
     try:
+        drop_item()
+        time.sleep(5)
         # Close the gripper to grab the item
         print("Closing gripper to grab the item...")
         pwm_gripper.ChangeDutyCycle(9.0)  # Adjust this value to close the gripper
