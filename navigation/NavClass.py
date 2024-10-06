@@ -89,7 +89,8 @@ class NavClass:
             attractive_f.append(self.attraction_calculation(self.dataDict['packingBayRB'], 1))
         
             # drive towards packingbay
-            self.forward_vel, self.rot_vel = self.normalise_velocity(self.calculate_resultant_velocity(attractive_f, repulsive_f))
+            vels = self.calculate_resultant_velocity(attractive_f, repulsive_f)
+            self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
         
         elif state == 'explorationState':
             self.forward_vel = 0
@@ -102,7 +103,8 @@ class NavClass:
             attractive_f, repulsive_f = self.field_force_calculator(attractors)
             attractive_f.append(self.attraction_calculation(self.rowEstimation[0], 1))
             # drive towards desired row estimation using potential fields
-            self.forward_vel, self.rot_vel = self.normalise_velocity(self.calculate_resultant_velocity(attractive_f, repulsive_f))
+            vels = self.calculate_resultant_velocity(attractive_f, repulsive_f)
+            self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
         
         elif state == 'movingDownRowState':
             # self.forward_vel, self.rot_vel = self.potential_fields()
@@ -110,7 +112,8 @@ class NavClass:
             # calculate forces
             attractive_f, repulsive_f = self.field_force_calculator(attractors)
             # drive towards desired row marker using potential fields
-            self.forward_vel, self.rot_vel = self.normalise_velocity(self.calculate_resultant_velocity(attractive_f, repulsive_f))
+            vels = self.calculate_resultant_velocity(attractive_f, repulsive_f)
+            self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
         
         elif state == 'lostInRowState':
             # spin in a circle
@@ -119,7 +122,8 @@ class NavClass:
         
         elif state == 'movingToBayState':
             # back out of the row
-            self.forward_vel, self.rot_vel = self.normalise_velocity(self.back_out_with_virtual_wall())
+            vels = self.back_out_with_virtual_wall()
+            self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
         
         elif state == 'aligningWithBayState':
             self.forward_vel = 0
