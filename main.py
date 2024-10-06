@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
         # parse order data
         navSystem.plan_objectives()
-        Frequency = 10.0 #Hz
+        Frequency = 100.0 #Hz
         Interval = 1.0/Frequency
 
         while True:
