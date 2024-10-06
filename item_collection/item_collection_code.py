@@ -72,7 +72,7 @@ def bringliftdown():
     pwm_lift.ChangeDutyCycle(5.0)  # Example duty cycle to lower the lift (counterclockwise)
 
     # Adjust the sleep time based on how long it takes for the lift to fully retract
-    time.sleep(5)  # Adjust based on the time it takes to return to the starting position
+    time.sleep(15)  # Adjust based on the time it takes to return to the starting position
 
     # Stop the lift motor after reaching the bottom
     pwm_lift.ChangeDutyCycle(0)  # Turn off the motor
@@ -81,14 +81,7 @@ def bringliftdown():
 # Testing
 if __name__ == "__main__":
     try:
-        drop_item()
-        time.sleep(5)
-        # Close the gripper to grab the item
-        print("Closing gripper to grab the item...")
-        pwm_gripper.ChangeDutyCycle(9.0)  # Adjust this value to close the gripper
-        time.sleep(1)  # Allow time for the gripper to close
-        pwm_gripper.ChangeDutyCycle(0)  # Turn off the motor after closing
-        print("Item grabbed.")
+        bringliftdown()
         
     finally:
         cleanup()  # Ensure everything is cleaned up when done
