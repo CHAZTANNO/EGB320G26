@@ -81,11 +81,12 @@ def bringliftdown():
 # Testing
 if __name__ == "__main__":
     try:
-        # Test collecting an item from the middle shelf (shelf level 1)
-        collect_item(1)
-        time.sleep(3)  # Simulate time before dropping the item
-        drop_item()  # Drop the item
-        bringliftdown()
+        # Close the gripper to grab the item
+        print("Closing gripper to grab the item...")
+        pwm_gripper.ChangeDutyCycle(9.0)  # Adjust this value to close the gripper
+        time.sleep(1)  # Allow time for the gripper to close
+        pwm_gripper.ChangeDutyCycle(0)  # Turn off the motor after closing
+        print("Item grabbed.")
         
     finally:
         cleanup()  # Ensure everything is cleaned up when done
