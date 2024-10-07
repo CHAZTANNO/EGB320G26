@@ -31,7 +31,7 @@ if __name__ == "__main__":
         packerBotSim.StartSimulator()
 
         navSystem = nav.NavClass()
-        #led.setup()
+        led.setup()
         mob.setupMob()
 
         
