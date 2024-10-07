@@ -16,7 +16,7 @@ config = cap.create_video_configuration(main={"format":'XRGB8888',"size":(frameS
 
 pprint(cap.sensor_modes)                                        
 cap.configure(config)
-cap.set_controls({"ExposureTime": 200000, "AnalogueGain": 1.2, "ColourGains": (1.4,1.5)})
+cap.set_controls({"ExposureTime": 900000, "AnalogueGain": 30.0, "ColourGains": (1.4,1.5)})
 # ORIGINAL EXPOSURE TIME: 200000, 1.2
 cap.start()
 
@@ -54,29 +54,25 @@ def contourImage(mask):
 def GetDetectedWallPoints(frame, thresholdVals):
     height, width = frame.shape[:2]
 
-    # Create a mask with the same size as the image (bottom half set to 255, top half set to 0)
+    # Create a mask with the same size as the image (bottom half set to 255, top half set to 0) - walls always below half way
     maskBottomOnly = np.zeros((height, width), dtype=np.uint8)
     maskBottomOnly[height//2:, :] = 255  # Keep only the bottom half
      
     openKernel = np.ones((15,15), np.uint8)
     erodeKernel = np.ones((9,9), np.uint8)
     
-    kernel = np.ones((5,5), np.uint8)
-    grey = frame[:,:,2]
-    # __, whiteMask = cv2.threshold(grey, 163, 255, cv2.THRESH_BINARY)
     whiteMask = threshold(frame, thresholdVals)
     mask = whiteMask & maskBottomOnly
-    # cv2.imshow("whiteMask", whiteMask)
+
     opening = cv2.morphologyEx(mask, cv2.MORPH_OPEN, openKernel)
     openingFullHeight = cv2.morphologyEx(whiteMask, cv2.MORPH_OPEN, openKernel)
+
     cv2.imshow('full', openingFullHeight)
-    cv2.imshow("open", opening)
-    
-    expandedMask = cv2.erode(opening, erodeKernel, iterations=1)
+    # cv2.imshow("open", opening)
 
     edges = cv2.Canny(opening, 50, 150)
     lines = cv2.HoughLinesP(edges, 1, np.pi/180, threshold=40, minLineLength=50, maxLineGap=80)
-    cv2.imshow("edges", edges)
+    # cv2.imshow("edges", edges)
 
     min_height = height
     wallLine = None
@@ -84,7 +80,6 @@ def GetDetectedWallPoints(frame, thresholdVals):
     midx = 0
     midy = 0
     if lines is not None:
-        # x1, y1, x2, y2 = line[0]
         # cv2.line(frameGlobal, (x1, y1), (x2, y2), (0, 255, 255), 2)
         mergedLines = process_lines(lines, min_distance=10, min_angle=5)
         
@@ -93,14 +88,12 @@ def GetDetectedWallPoints(frame, thresholdVals):
             xAvg = int((x1+x2)/2)
             yAvg = int((y1+y2)/2)
             # cv2.line(frameGlobal, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            # if (expandedMask[yAvg, xAvg] != 0) and  (y1 > height/2+5) and (yAvg < min_height): #((expandedMask[y1,x1] == 0) or (x1 < 40) or (x1 > width-40)) and ((expandedMask[y2,x2] == 0) or (x2 < 40) or (x2 > width-40))
-            #     min_height = yAvg
-            #     wallLine = (x1, y1, x2, y2)
-            
+                       
             angleDeg = math.degrees(math.atan2(y2 - y1, x2 - x1))
-            if angleDeg < 0:
+            if angleDeg < 0: #convert to absolute angle
                 angleDeg += 180
-            if ((angleDeg < 80) or (angleDeg > 100)) and (y1 > height/2+5) and (yAvg < min_height): #((expandedMask[y1,x1] == 0) or (x1 < 40) or (x1 > width-40)) and ((expandedMask[y2,x2] == 0) or (x2 < 40) or (x2 > width-40)) #(expandedMask[yAvg, xAvg] != 0) and  
+
+            if ((angleDeg < 80) or (angleDeg > 100)) and (y1 > height/2+5) and (yAvg < min_height): 
                 min_height = yAvg
                 if (angleDeg > 10) and (angleDeg < 170): #not head on, one point only
                     pointCount = 1
@@ -112,9 +105,10 @@ def GetDetectedWallPoints(frame, thresholdVals):
 
     # Draw the highest line
     if pointCount == 1:
-        cv2.circle(frameGlobal, (midx,midy), 10, (0,255,255), -1)
         rangeMid = findRangeWall(midy, openingFullHeight)
         bearingMid = findBearing(midx, 1)
+        cv2.circle(frameGlobal, (midx,midy), 10, (0,255,255), -1)
+        cv2.putText(frameGlobal, )
         outputRB = [[rangeMid, bearingMid], None, None]
     elif pointCount == 2:
         x1, y1, x2, y2 = wallLine
@@ -272,7 +266,7 @@ while(1):
 
     homeWall = [0, 35, 45, 255, 0, 255]
 
-    GetDetectedWallPoints(frameHSV, wallThreshold3)
+    GetDetectedWallPoints(frameHSV, homeWall)
 
 
     # cv2.imshow("Threshold", frameGlobal)			# Display thresholded frame
