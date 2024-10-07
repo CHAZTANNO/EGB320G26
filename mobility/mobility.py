@@ -139,6 +139,19 @@ def control_loop():
         board.motor_stop(board.ALL)
         print("Motors stopped")
 
+def setupMob():
+    board_detect()
+
+    while board.begin() != board.STA_OK:
+        print_board_status()
+        print("board begin failed")
+        time.sleep(2)
+    print("board begin success")
+
+    board.set_encoder_enable(board.ALL)
+    board.set_encoder_reduction_ratio(board.ALL, 50)
+    board.set_moter_pwm_frequency(1000)
+
 if __name__ == "__main__":
     board_detect()
 

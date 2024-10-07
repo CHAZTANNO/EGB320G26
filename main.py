@@ -32,6 +32,9 @@ if __name__ == "__main__":
 
         navSystem = nav.NavClass()
         #led.setup()
+        mob.setupMob()
+
+        
 
         # parse order data
         navSystem.plan_objectives()
