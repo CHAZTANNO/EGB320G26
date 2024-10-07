@@ -81,6 +81,7 @@ def bringliftdown():
 # Testing
 if __name__ == "__main__":
     try:
+        collect_item(2)
         bringliftdown()
         
     finally:
