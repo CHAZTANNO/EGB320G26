@@ -20,8 +20,10 @@ class VelocityCalculator:
         total_force_x = sum(f[0] for f in attractive_forces) + sum(f[0] for f in repulsive_forces)
         total_force_y = sum(f[1] for f in attractive_forces) + sum(f[1] for f in repulsive_forces)
 
-        # Calculate target velocities based on forces
-        target_forward_velocity = np.sqrt(total_force_x**2 + total_force_y**2)
+        # Calculate target forward velocity, allowing it to be negative or positive based on force direction
+        target_forward_velocity = np.sqrt(total_force_x**2 + total_force_y**2) * np.sign(total_force_x)
+
+        # Calculate target rotational velocity, without limiting between -pi and pi
         target_rotational_velocity = np.arctan2(total_force_y, total_force_x)
 
         # Apply a low-pass filter to smooth the velocity transitions

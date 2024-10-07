@@ -28,7 +28,7 @@ class startState(State):
             if navSys.dataDict['packingBayRB'] != None and (navSys.dataDict['packingBayRB'][0] < 1.9):
                 event = 'finished_calibration'
         elif rowNo == 1:
-            if navSys.dataDict['packingBayRB'] != None and (navSys.dataDict['packingBayRB'][0] < 0.9):
+            if navSys.dataDict['packingBayRB'] != None and (navSys.dataDict['packingBayRB'][0] < 0.85):
                 event = 'finished_calibration'
         else:
             if navSys.dataDict['packingBayRB'] == None:
@@ -48,9 +48,18 @@ class explorationState(State):
         rowEstimate = navSys.rowEstimation
         rowNo = navSys.objectiveRow
 
-        if rowEstimate[0] != None and rowEstimate[0][0]<0.4:
-            # row estimation identified
-            event = 'row_pose_estimated'
+        if rowEstimate[0] != None:
+            if navSys.objectiveRow==0:
+                # row estimation identified
+                event = 'row_pose_estimated'
+            elif navSys.objectiveRow==1 and rowEstimate[0][0]<0.55:
+                # row estimation identified
+                event = 'row_pose_estimated'
+            elif navSys.objectiveRow==2 and rowEstimate[0][0]<0.4:
+                # row estimation identified
+                event = 'row_pose_estimated'
+            else:
+                event = 'row_pose_not_found'
         else:
             event = 'row_pose_not_found'
 
@@ -89,20 +98,30 @@ class movingDownRowState(State):
         print('Moving down row...')
         event = ''
         rowNo = navSys.objectiveRow
-        if navSys.dataDict['rowMarkerRB'][rowNo] == None and len(navSys.dataDict['wallPoints'])==2:
-            event = 'reached_row_end'
-        elif navSys.dataDict['rowMarkerRB'][rowNo] == None and len(navSys.dataDict['wallPoints'])!=2:
-            event = 'lost_row_end'
+        chassisOffset = 0.1
+
+        print(navSys.dataDict['rowMarkerRB'][rowNo])
+        print(navSys.dataDict['wallPoints'])
+
+        if navSys.dataDict['rowMarkerRB'][rowNo] != None:
+            if navSys.dataDict['rowMarkerRB'][rowNo][0] <= navSys.BAY_DISTANCES[navSys.currentObjective['bay']]:
+                event = 'arrived_at_bay'
+            else:
+                event = 'travelling_to_bay'
+        elif navSys.dataDict['rowMarkerRB'][rowNo] == None and navSys.currentObjective['bay'] == 3:
+            if navSys.dataDict['wallPoints'] != None:
+                if len(navSys.dataDict['wallPoints']) == 2:
+                    event = 'arrived_at_bay'
+            else:
+                event = 'lost_in_row'
         else:
-            event = 'end_not_reached'
+            event = 'lost_in_row'
         
         #Check transition event
-        if event == 'reached_row_end':
-            if navSys.currentObjective['bay']==3:
-                return aligningWithBayState()
-            else:
-                return movingToBayState()
-        elif event == 'lost_row_end':
+        if event == 'arrived_at_bay':
+            navSys.timerA = datetime.now()
+            return aligningWithBayState()
+        elif event == 'lost_in_row':
             return lostInRowState()
         else:
             return movingDownRowState()
@@ -152,40 +171,183 @@ class aligningWithBayState(State):
         event = ''
 
         # check to see if an orange item is directly in front of you and close
-        # if navSys.dataDict['itemsRB'] != None:
-        #     for items in navSys.dataDict['itemsRB']:
-        #         if items != None:
-        #             for item in items:
-        #                 if item != None:
-        #                     print(item)
-        #                     if item[0] < 0.25:
-        #                         if (item[1] <= 0.25 and item[1] >= -0.25):
-        #                             print(str(item[1]))
-        #                             event = 'facing_bay'
-
-        # check to see if enough time has passed at a given velocity to turn 90 degrees
-        turn_time = 3
-        time_delta = navSys.timerB - navSys.timerA
-        if time_delta.seconds >= turn_time:
-            event = 'facing_bay'
+        if navSys.dataDict['itemsRB'] != None:
+            for items in navSys.dataDict['itemsRB']:
+                if items != None:
+                    for item in items:
+                        if item != None:
+                            if item[0] < 0.25:
+                                if (item[1] <= 0.25 and item[1] >= -0.25):
+                                    event = 'facing_bay'
 
         if event=='facing_bay':
             navSys.LEDstate = 'YELLOW'
-            return collectItemState()
+            return approachItemState()
         else:
             return aligningWithBayState()
+
+class approachItemState(State):
+
+    def run(self, navSys):
+        event = ''
+        # check to see if an orange item is directly in front of you and close
+        if navSys.dataDict['itemsRB'] != None:
+            for items in navSys.dataDict['itemsRB']:
+                if items != None:
+                    for item in items:
+                        if item != None:
+                            if item[0] <= 0.1:
+                                event = 'item_close'
+
+        if event=='item_close':
+            return collectItemState()
+        else:
+            return approachItemState()
 
 class collectItemState(State):
 
     def run(self, navSys):
+        event = ''
         if navSys.itemState == 'Collected':
             event = 'item_collected'
 
         if event=='item_collected':
             navSys.LEDstate = 'GREEN'
+            navSys.timerA = datetime.now()
+            return bayReversalState()
+        else:
+            return collectItemState()
+
+class bayReversalState(State):
+
+    def run(self, navSys):
+        event = ''
+        navSys.timerB = datetime.now()
+        diff = navSys.timerB-navSys.timerA
+        if  diff.total_seconds() >= 3:
+            event = 'row_centered'
+
+        if event=='row_centered':
+            return leavingRowState()
+        else:
+            return bayReversalState()
+
+class leavingRowState(State):
+
+    def run(self, navSys):
+        print('Searching for shelves...')
+        event = ''
+        rowEstimate = navSys.rowEstimation
+
+        if navSys.objectiveRow == 0:
+            if navSys.dataDict['packingBayRB']!=None:
+                event = 'found_pb'
+        else:
+            if rowEstimate[0] != None and navSys.dataDict['wallPoints'] != None:
+                print(rowEstimate[0])
+                print(navSys.dataDict['wallPoints'])
+                if len(navSys.dataDict['wallPoints'])==2 and navSys.dataDict['wallPoints'][0][0]>1.85:
+                    event = 'row_pose_estimated'
+            else:
+                event = 'row_pose_not_found'
+
+        #Check transition event
+        if event == 'row_pose_estimated':
+            return exitingRowState()
+        elif event == 'found_pb':
+            return movingForPBState()
+        else:
+            return leavingRowState()
+
+class exitingRowState(State):
+
+    def run(self, navSys):
+        print('Driving out of row...')
+        event = ''
+        rowEstimate = navSys.rowEstimation
+
+        if rowEstimate[0] == None:
+            event = 'out_of_row'
+        else:
+            event = 'in_row'
+
+        #Check transition event
+        if event == 'out_of_row':
+            return exploringForPBState()
+        else:
+            return exitingRowState()
+
+class exploringForPBState(State):
+
+    def run(self, navSys):
+        print('Adjusting to find PB...')
+        event = ''
+
+        if navSys.dataDict['wallPoints']!=None:
+            if len(navSys.dataDict['wallPoints'])==2:
+                if navSys.dataDict['wallPoints'][0][0]<=0.5:
+                    event = 'ready_for_pb'
+
+        #Check transition event
+        if event == 'ready_for_pb':
+            return scanningForPBState()
+        else:
+            return exploringForPBState()
+
+class scanningForPBState(State):
+
+    def run(self, navSys):
+        print('Scanning for PB...')
+        event = ''
+
+        if navSys.dataDict['packingBayRB']!=None:
+            event = 'found_pb'
+
+        #Check transition event
+        if event == 'found_pb':
+            return movingForPBState()
+        else:
+            return scanningForPBState()
+
+class movingForPBState(State):
+
+    def run(self, navSys):
+        print('Moving to PB...')
+        event = ''
+
+        if navSys.dataDict['packingBayRB']==None:
+            event = 'at_pb'
+        elif navSys.dataDict['packingBayRB']!=None:
+            if navSys.dataDict['packingBayRB'][0] <= 0.1:
+                event = 'at_pb'
+        else:
+            event = 'lost_pb'
+
+        #Check transition event
+        if event == 'at_pb':
+            navSys.itemState='Dropping'
+            return returnItemState()
+        elif event == 'lost_pb':
+            return scanningForPBState()
+        else:
+            return movingForPBState()
+
+class returnItemState(State):
+
+    def run(self, navSys):
+        print('Returning item...')
+        print(navSys.itemState)
+        event = ''
+
+        if navSys.itemState=='Not_Collected':
+            event = 'item_returned'
+
+        #Check transition event
+        if event == 'item_returned':
+            navSys.LEDstate = 'RED'
             return idleState()
         else:
-            return aligningWithBayState()
+            return returnItemState()
 
 class idleState(State):
 

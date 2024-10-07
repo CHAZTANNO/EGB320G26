@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
         # parse order data
         navSystem.plan_objectives()
-        Frequency = 1000.0 #Hz
+        Frequency = 10.0 #Hz
         Interval = 1.0/Frequency
 
         while True:
@@ -60,13 +60,14 @@ if __name__ == "__main__":
             # ITEM COLLECTION
             # tell it to collect at the objective height if needed
             if navSystem.itemState == 'Collecting':
-                itemcollection.collect_item(navSystem.currentObjective.get['height'])
+                #itemcollection.collect_item(navSystem.currentObjective.get['height'])
+                packerBotSim.CollectItem(navSystem.currentObjective['height'])
                 navSystem.itemState = 'Collected'
             
             if navSystem.itemState == 'Dropping':
-                itemcollection.drop_item()
+                #itemcollection.drop_item()
+                packerBotSim.Dropitem()
                 navSystem.itemState = 'Not_Collected'
-                # update objective
 
             packerBotSim.UpdateObjectPositions()
 

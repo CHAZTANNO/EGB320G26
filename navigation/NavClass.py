@@ -22,7 +22,7 @@ class NavClass:
 
         # set max values
         self.max_forward_vel = 0.15
-        self.max_rot_vel = 3 #0.07
+        self.max_rot_vel = 0.15
 
         self.dataDict = {
             'itemsRB': [],
@@ -39,17 +39,17 @@ class NavClass:
             'obstaclesRB': [1, 1],
             'rowMarkerRB': [1, 0],
             'shelvesRB': [1, 1],
-            'wallPoints': [1, 1]
+            'wallPoints': [1, 0]
         }
 
         self.rowEstimation = [None]
 
         # bay centers, need to add offeset of camera pos
         self.BAY_DISTANCES = {
-            3: 0.1315,
-            2: 0.3945,
-            1: 0.6515,
-            0: 0.9085 
+            3: 0.1, #0.1315
+            2: 0.37, #0.3945
+            1: 0.62, #0.6515
+            0: 0.88 #0.9085 
         }
     
     def plan_objectives(self):
@@ -81,22 +81,24 @@ class NavClass:
         state = str(self.my_sm.get_current_state())
 
         if state == 'startState':
-            # drive towards packing bay
-            attractors = []
-            attractive_f, repulsive_f = self.field_force_calculator(attractors)
+            # # drive towards packing bay
+            # attractors = []
+            # attractive_f, repulsive_f = self.field_force_calculator(attractors)
         
-            # special force considerations
-            attractive_f.append(self.attraction_calculation(self.dataDict['packingBayRB'], 1))
+            # # special force considerations
+            # attractive_f.append(self.attraction_calculation(self.dataDict['packingBayRB'], 1))
         
-            # drive towards packingbay
-            vels = self.calculate_resultant_velocity(attractive_f, repulsive_f)
-            self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
+            # # drive towards packingbay
+            # vels = self.calculate_resultant_velocity(attractive_f, repulsive_f)
+            # self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
+
+            self.forward_vel, self.rot_vel = self.pf_packing_bay()
         
         elif state == 'explorationState':
             self.forward_vel = 0
             self.rot_vel = -self.max_rot_vel
         
-        elif state == 'searchState':
+        elif state == 'searchState' or state == 'exitingRowState':
             # what is attractive in this state
             attractors = []
             # calculate forces
@@ -108,13 +110,14 @@ class NavClass:
         
         elif state == 'movingDownRowState':
             # self.forward_vel, self.rot_vel = self.potential_fields()
-            attractors = ['rowMarkerRB']
+            #attractors = ['rowMarkerRB']
             # calculate forces
-            attractive_f, repulsive_f = self.field_force_calculator(attractors)
+            #attractive_f, repulsive_f = self.field_force_calculator(attractors)
             # drive towards desired row marker using potential fields
-            vels = self.calculate_resultant_velocity(attractive_f, repulsive_f)
-            self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
-        
+            # vels = self.calculate_resultant_velocity(attractive_f, repulsive_f)
+            #self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
+            self.forward_vel, self.rot_vel = self.potential_fields()
+
         elif state == 'lostInRowState':
             # spin in a circle
             self.forward_vel = 0
@@ -132,8 +135,43 @@ class NavClass:
             else:
                 self.rot_vel = -self.max_rot_vel
         
+        elif state == 'approachItemState':
+            self.forward_vel = 0.01
+            self.rot_vel = 0
+        
         elif state == 'collectItemState':
             self.itemState = 'Collecting'
+        
+        elif state == 'bayReversalState':
+            self.forward_vel = -0.01
+            self.rot_vel = 0
+
+        elif state == 'leavingRowState':
+            self.forward_vel = 0
+            if (self.currentObjective['shelf'] % 2) == 0:
+                self.rot_vel = self.max_rot_vel
+            else:
+                self.rot_vel = -self.max_rot_vel
+        
+        elif state == 'exploringForPBState':
+            self.forward_vel, self.rot_vel = self.potential_field_to_point((0.1, 0))
+        
+        elif state == 'scanningForPBState':
+            # spin in a circle
+            self.forward_vel = 0
+            self.rot_vel = -self.max_rot_vel
+        
+        elif state == 'movingForPBState':
+            self.forward_vel, self.rot_vel = self.pf_packing_bay()
+            # if self.dataDict['packingBayRB']==None:
+            #     if self.dataDict['wallPoints']!=None:
+            #         if len(self.dataDict['wallPoints'])>1:
+            #             print(self.dataDict['wallPoints'])
+            #             self.forward_vel, self.rot_vel = self.potential_field_to_point(tuple(self.dataDict['wallPoints'][1]))
+        
+        elif state == 'returnItemState':
+            self.forward_vel=0
+            self.rot_vel=0
         
         elif state == 'idleState':
             # stop
@@ -145,24 +183,30 @@ class NavClass:
 
     def normalise_velocity(self, forward_vel, rot_vel):
         """
-        Normalizes forward and rotational velocities to ensure they do not exceed the maximum values.
+        Normalizes forward and rotational velocities while considering their signs and keeping them proportional.
         
         :param forward_vel: The forward velocity to normalize.
         :param rot_vel: The rotational velocity to normalize.
-        :param max_forward_vel: The maximum forward velocity.
-        :param max_rot_vel: The maximum rotational velocity.
-        :return: Normalized forward and rotational velocities.
+        :param max_forward_vel: The maximum forward velocity (can be positive or negative).
+        :param max_rot_vel: The maximum rotational velocity (can be positive or negative).
+        :return: Proportionally normalized forward and rotational velocities with their signs preserved.
         """
-        # Normalize forward velocity
-        if abs(forward_vel) > self.max_forward_vel:
-            forward_vel = self.max_forward_vel * (forward_vel / abs(forward_vel))
+        # Ensure max values are positive (since they define the upper limit)
+        max_forward_vel = abs(self.max_forward_vel)
+        max_rot_vel = abs(self.max_rot_vel)
+        
+        # Calculate scaling factors based on the absolute values of velocities
+        forward_factor = min(1, max_forward_vel / abs(forward_vel)) if forward_vel != 0 else 1
+        rot_factor = min(1, max_rot_vel / abs(rot_vel)) if rot_vel != 0 else 1
 
-        # Normalize rotational velocity
-        if abs(rot_vel) > self.max_rot_vel:
-            rot_vel = self.max_rot_vel * (rot_vel / abs(rot_vel))
+        # Use the smaller factor to scale both velocities proportionally
+        scaling_factor = min(forward_factor, rot_factor)
+
+        # Apply scaling factor and retain the original sign of the velocities
+        forward_vel *= scaling_factor
+        rot_vel *= scaling_factor
 
         return forward_vel, rot_vel
-
 
     def calculate_midpoint(self, shelves_rb):
         """
@@ -270,19 +314,94 @@ class NavClass:
 
     def calculate_resultant_velocity(self, attractive_forces, repulsive_forces):
         return self.v_calc.calculate_smooth_velocity(attractive_forces, repulsive_forces)
+    
+    def potential_field_to_point(self, target_rb):
+        # Define parameters for the potential fields
+        attractive_gain = 10  # Gain for the attractive force (towards target point)
+        repulsive_gain = 1    # Gain for the repulsive force (away from obstacles, shelves, and walls)
+        safe_distance = 0.15  # Distance at which repulsive force starts to take effect
+        obstacle_gain = 2     # Specific gain for obstacles
+        shelf_gain = 1        # Specific gain for shelves
+        wall_gain = 5         # Specific gain for walls
 
+        # Initialize the resultant force (x, y) components
+        force_x = 0.0
+        force_y = 0.0
+
+        obstaclesRB = self.dataDict['obstaclesRB']
+        shelvesRB = self.dataDict['shelvesRB']
+        wallsRB = self.dataDict['wallPoints']
+
+        # Calculate attractive force towards the target point (if detected)
+        if target_rb is not None:
+            target_range, target_bearing = target_rb
+            force_x += attractive_gain * (1.0 / target_range) * np.cos(target_bearing)
+            force_y += attractive_gain * (1.0 / target_range) * np.sin(target_bearing)
+
+        # Calculate repulsive forces from obstacles
+        if obstaclesRB is not None:
+            for obstacle in obstaclesRB:
+                if obstacle is not None:
+                    obstacle_range = obstacle[0]
+                    obstacle_bearing = obstacle[1]
+                    if obstacle_range < safe_distance:
+                        repulsive_force = repulsive_gain * (1.0 / obstacle_range - 1.0 / safe_distance) / (obstacle_range ** 2)
+                        force_x -= repulsive_force * np.cos(obstacle_bearing) * obstacle_gain
+                        force_y -= repulsive_force * np.sin(obstacle_bearing) * obstacle_gain
+
+        # Calculate repulsive forces from shelves
+        if shelvesRB is not None:
+            for shelf in shelvesRB:
+                if shelf is not None:
+                    shelf_range = shelf[0]
+                    shelf_bearing = shelf[1]
+                    if shelf_range < safe_distance:
+                        repulsive_force = repulsive_gain * (1.0 / shelf_range - 1.0 / safe_distance) / (shelf_range ** 2)
+                        force_x -= repulsive_force * np.cos(shelf_bearing) * shelf_gain
+                        force_y -= repulsive_force * np.sin(shelf_bearing) * shelf_gain
+
+        # Calculate repulsive forces from walls
+        if wallsRB is not None:
+            for wall in wallsRB:
+                if wall is not None:
+                    wall_range = wall[0]
+                    wall_bearing = wall[1]
+                    if wall_range < safe_distance:
+                        repulsive_force = repulsive_gain * (1.0 / wall_range - 1.0 / safe_distance) / (wall_range ** 2)
+                        force_x -= repulsive_force * np.cos(wall_bearing) * wall_gain
+                        force_y -= repulsive_force * np.sin(wall_bearing) * wall_gain
+
+        # Calculate the resultant velocity commands
+        x_dot = force_x  # Linear speed in x direction
+        theta_dot = np.arctan2(force_y, force_x)  # Rotational speed (direction of the resultant force)
+
+        # Normalize and scale the velocities to ensure they are within the robot's limits
+        max_linear_speed = 0.1  # Example max speed (adjust based on your robot)
+        max_rotation_speed = 0.5  # Example max rotational speed (adjust based on your robot)
+
+        # Normalize the linear velocity
+        speed = np.hypot(force_x, force_y)
+        if speed > max_linear_speed:
+            x_dot = max_linear_speed * (force_x / speed)
+
+        # Ensure theta_dot is within the allowed range
+        if abs(theta_dot) > max_rotation_speed:
+            theta_dot = np.sign(theta_dot) * max_rotation_speed
+
+        # Set the target velocities to the robot
+        return x_dot, theta_dot
 
     def potential_fields(self):
         # Define parameters for the potential fields
         attractive_gain = 10  # Gain for the attractive force (towards row markers)
         repulsive_gain = 1   # Gain for the repulsive force (away from obstacles, shelves, and walls)
-        safe_distance = 0.2    # Distance at which repulsive force starts to take effect
+        safe_distance = 0.15    # Distance at which repulsive force starts to take effect
         random_explore_gain = 0  # Gain for the random exploration force
 
         # specific object params
-        obstacle_gain = 2
+        obstacle_gain = 8
         shelf_gain = 1
-        wall_gain = 5
+        wall_gain = 0
         packingStation_gain = 5
 
         # Initialize the resultant force (x, y) components
@@ -373,6 +492,86 @@ class NavClass:
 
         # Set the target velocities to the robot
         return x_dot, theta_dot
+
+    def pf_packing_bay(self):
+        # Define parameters for the potential fields
+        attractive_gain = 10  # Gain for the attractive force (towards the packing bay)
+        repulsive_gain = 1   # Gain for the repulsive force (away from obstacles, walls, and shelves)
+        safe_distance = 0.15    # Distance at which repulsive force starts to take effect
+        obstacle_gain = 8     # Specific gain for obstacles
+        wall_gain = 5           # Specific gain for walls
+        shelf_gain = 3          # Specific gain for shelves
+        packingStation_gain = 5  # Specific gain for packing station
+
+        # Initialize the resultant force (x, y) components
+        force_x = 0.0
+        force_y = 0.0
+
+        packingBayRB = self.dataDict['packingBayRB']
+        obstaclesRB = self.dataDict['obstaclesRB']
+        wallsRB = self.dataDict['wallPoints']
+        shelvesRB = self.dataDict['shelvesRB']
+
+        # Calculate attractive force towards the packing bay (if detected)
+        if packingBayRB is not None:
+            packingBayRange = packingBayRB[0]
+            packingBayBearing = packingBayRB[1]
+            force_x += attractive_gain * (1.0 / packingBayRange) * np.cos(packingBayBearing)
+            force_y += attractive_gain * (1.0 / packingBayRange) * np.sin(packingBayBearing)
+
+        # Calculate repulsive forces from obstacles
+        if obstaclesRB is not None:
+            for obstacle in obstaclesRB:
+                if obstacle is not None:
+                    obstacleRange = obstacle[0]
+                    obstacleBearing = obstacle[1]
+                    if obstacleRange < safe_distance:
+                        repulsive_force = repulsive_gain * (1.0 / obstacleRange - 1.0 / safe_distance) / (obstacleRange ** 2)
+                        force_x -= repulsive_force * np.cos(obstacleBearing) * obstacle_gain
+                        force_y -= repulsive_force * np.sin(obstacleBearing) * obstacle_gain
+
+        # Calculate repulsive forces from walls
+        if wallsRB is not None:
+            for wall in wallsRB:
+                if wall is not None:
+                    wallRange = wall[0]
+                    wallBearing = wall[1]
+                    if wallRange < safe_distance:
+                        repulsive_force = repulsive_gain * (1.0 / wallRange - 1.0 / safe_distance) / (wallRange ** 2)
+                        force_x -= repulsive_force * np.cos(wallBearing) * wall_gain
+                        force_y -= repulsive_force * np.sin(wallBearing) * wall_gain
+
+        # Calculate repulsive forces from shelves
+        if shelvesRB is not None:
+            for shelf in shelvesRB:
+                if shelf is not None:
+                    shelfRange = shelf[0]
+                    shelfBearing = shelf[1]
+                    if shelfRange < safe_distance:
+                        repulsive_force = repulsive_gain * (1.0 / shelfRange - 1.0 / safe_distance) / (shelfRange ** 2)
+                        force_x -= repulsive_force * np.cos(shelfBearing) * shelf_gain
+                        force_y -= repulsive_force * np.sin(shelfBearing) * shelf_gain
+
+        # Calculate the resultant velocity commands
+        x_dot = force_x  # Linear speed in x direction
+        theta_dot = np.arctan2(force_y, force_x)  # Rotational speed (direction of the resultant force)
+
+        # Normalize and scale the velocities to ensure they are within the robot's limits
+        max_linear_speed = 0.1  # Example max speed (adjust based on your robot)
+        max_rotation_speed = 0.5  # Example max rotational speed (adjust based on your robot)
+
+        # Normalize the linear velocity
+        speed = np.hypot(force_x, force_y)
+        if speed > max_linear_speed:
+            x_dot = max_linear_speed * (force_x / speed)
+
+        # Ensure theta_dot is within the allowed range
+        if abs(theta_dot) > max_rotation_speed:
+            theta_dot = np.sign(theta_dot) * max_rotation_speed
+
+        # Set the target velocities to the robot
+        return x_dot, theta_dot
+
     
     def back_out_of_row(self):
         # Base gain parameters

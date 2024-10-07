@@ -1119,7 +1119,7 @@ class SceneParameters(object):
 
 		# Obstacles Starting Positions - set to none if you do not want a specific obstacle in the scene
 		self.obstacle0_StartingPosition = [-0.45, 0.5]  # starting position of obstacle 0 [x, y] (in metres), -1 if want to use current coppelia position, or none if not wanted in the scene
-		self.obstacle1_StartingPosition = [-0.25,-0.675]   # starting position of obstacle 1 [x, y] (in metres), -1 if want to use current coppelia position, or none if not wanted in the scene
+		self.obstacle1_StartingPosition = [-0.50,-0.1]   # starting position of obstacle 1 [x, y] (in metres), -1 if want to use current coppelia position, or none if not wanted in the scene
 		self.obstacle2_StartingPosition = None   # starting position of obstacle 2 [x, y] (in metres), -1 if want to use current coppelia position, or none if not wanted in the scene
 
 
@@ -1149,7 +1149,7 @@ class RobotParameters(object):
 		# Camera Parameters
 		self.cameraOrientation = 'landscape' # specifies the orientation of the camera, either landscape or portrait
 		self.cameraDistanceFromRobotCenter = 0.1 # distance between the camera and the center of the robot in the direction of the front of the robot
-		self.cameraHeightFromFloor = 0.1 # height of the camera relative to the floor in metres
+		self.cameraHeightFromFloor = 0.12 # height of the camera relative to the floor in metres
 		self.cameraTilt = 0.0 # tilt of the camera in radians
 		self.cameraPerspectiveAngle = math.radians(60) # do not change this parameter
 
@@ -1163,8 +1163,8 @@ class RobotParameters(object):
 
 		# collector Parameters
 		self.collectorQuality = 1.0 # specifies how good your item collector is from 0 to 1.0 (with 1.0 being awesome and 0 being non-existent)
-		self.autoCollectItem = True #specifies whether the simulator automatically collects items if near the collector 
-		self.maxCollectDistance = 0.03 #specificies the operating distance of the automatic collector function. Item needs to be less than this distance to the collector
+		self.autoCollectItem = False #specifies whether the simulator automatically collects items if near the collector 
+		self.maxCollectDistance = 0.1 #specificies the operating distance of the automatic collector function. Item needs to be less than this distance to the collector
 
 		self.sync = False
 
