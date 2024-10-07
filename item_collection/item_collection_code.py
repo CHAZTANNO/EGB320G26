@@ -81,8 +81,8 @@ def bringliftdown():
 # Testing
 if __name__ == "__main__":
     try:
-        collect_item(2)
-        #bringliftdown()
+        #collect_item(2)
+        bringliftdown()
         
     finally:
         cleanup()  # Ensure everything is cleaned up when done
