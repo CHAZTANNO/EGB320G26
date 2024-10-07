@@ -45,6 +45,8 @@ def SetTargetVelocities(x_dot, theta_dot):
     if (x_dot == 0 and theta_dot == 0):
         # board.motor_movement([board.M1], left_direction, left_motor_output)
         # board.motor_movement([board.M2], right_direction, right_motor_output)
+        left_direction = "CCW"
+        right_direction = "CW"
         print("M1 - Direction: ", str(left_direction), "Speed: ", str(left_motor_output))
         print("M2 - Direction: ", str(right_direction), "Speed: ", str(right_motor_output))
         return
