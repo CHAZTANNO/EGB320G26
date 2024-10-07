@@ -5,7 +5,7 @@ from warehousebot_lib import *
 from navigation import NavClass as nav
 from navigation import state_machine as sm
 from mobility import mobility as mob
-from mobility import led
+#from mobility import led
 from item_collection import item_collection_code as itemcollection
 
 import random
@@ -31,7 +31,7 @@ if __name__ == "__main__":
         packerBotSim.StartSimulator()
 
         navSystem = nav.NavClass()
-        led.setup()
+        #led.setup()
 
         # parse order data
         navSystem.plan_objectives()
@@ -51,7 +51,7 @@ if __name__ == "__main__":
             # update the velo and rot velo as well as LED state
             packerBotSim.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) # 
             mob.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) #
-            led.set_LED(navSystem.LEDstate) #
+            #led.set_LED(navSystem.LEDstate) #
             
 
             # ITEM COLLECTION
