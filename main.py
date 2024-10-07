@@ -52,9 +52,10 @@ if __name__ == "__main__":
 
             # MOBILITY
             # update the velo and rot velo as well as LED state
-            packerBotSim.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) # 
-            mob.SetTargetVelocities(navSystem.forward_vel, -navSystem.rot_vel) #
-            #led.set_LED(navSystem.LEDstate) #
+            packerBotSim.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) #
+            mobfvel, mobrvel = navSystem.normalise_velocity(navSystem.forward_vel, navSystem.rot_vel)
+            mob.SetTargetVelocities(mobfvel, -mobrvel) #
+            led.set_LED(navSystem.LEDstate)
             
 
             # ITEM COLLECTION
