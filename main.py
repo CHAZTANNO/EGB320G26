@@ -60,7 +60,7 @@ if __name__ == "__main__":
                 itemcollection.collect_item(navSystem.currentObjective.get['height'])
                 navSystem.itemState = 'Collected'
             
-            if navSystem.itemstate == 'Dropping':
+            if navSystem.itemState == 'Dropping':
                 itemcollection.drop_item()
                 navSystem.itemState = 'Not_Collected'
                 # update objective
