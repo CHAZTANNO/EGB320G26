@@ -51,7 +51,7 @@ def SetTargetVelocities(x_dot, theta_dot):
         right_direction = board.CW
         left_motor_output = 0
         right_motor_output = 0
-        
+
         board.motor_movement([board.M1], left_direction, left_motor_output)
         board.motor_movement([board.M2], right_direction, right_motor_output)
         print("M1 - Direction: ", str(left_direction), "Speed: ", str(left_motor_output))
@@ -160,13 +160,18 @@ if __name__ == "__main__":
     parser.add_argument("--interactive", action="store_true", help="Start in interactive mode")
 
     args = parser.parse_args()
-
-    if args.x_dot is not None or args.theta_dot is not None:
-        # Call SetTargetVelocities with command-line arguments
-        SetTargetVelocities(args.x_dot, args.theta_dot)
-        print(f"Set target velocities: x_dot={args.x_dot}, theta_dot={args.theta_dot}")
-    elif args.interactive:
-        # Start interactive mode
-        control_loop()
-    else:
-        print("Please provide both --x_dot and --theta_dot for command-line mode or use --interactive for manual control.")
+    try:
+        if args.x_dot is not None or args.theta_dot is not None:
+            # Call SetTargetVelocities with command-line arguments
+            SetTargetVelocities(args.x_dot, args.theta_dot)
+            print(f"Set target velocities: x_dot={args.x_dot}, theta_dot={args.theta_dot}")
+        elif args.interactive:
+            # Start interactive mode
+            control_loop()
+        else:
+            print("Please provide both --x_dot and --theta_dot for command-line mode or use --interactive for manual control.")
+    except KeyboardInterrupt:
+        print("Program interrupted by user")
+        board.motor_stop(board.ALL)
+        print("Motors stopped")
+        
