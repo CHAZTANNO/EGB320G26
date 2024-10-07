@@ -46,23 +46,23 @@ def SetTargetVelocities(x_dot, theta_dot):
     # left_wheel_speed = x_dot - (theta_dot * wheel_base) / 2
     # right_wheel_speed = x_dot + (theta_dot * wheel_base) / 2
     
-    if (x_dot == 0 and theta_dot == 0):
-        left_direction = board.CCW
-        right_direction = board.CW
-        left_motor_output = 0
-        right_motor_output = 0
-        board.motor_movement([board.M1], left_direction, left_motor_output)
-        board.motor_movement([board.M2], right_direction, right_motor_output)
-        print("M1 - Direction: ", str(left_direction), "Speed: ", str(left_motor_output))
-        print("M2 - Direction: ", str(right_direction), "Speed: ", str(right_motor_output))
-        return
+    # if (x_dot == 0 and theta_dot == 0):
+    #     left_direction = board.CCW
+    #     right_direction = board.CW
+    #     left_motor_output = 0
+    #     right_motor_output = 0
+    #     board.motor_movement([board.M1], left_direction, left_motor_output)
+    #     board.motor_movement([board.M2], right_direction, right_motor_output)
+    #     print("M1 - Direction: ", str(left_direction), "Speed: ", str(left_motor_output))
+    #     print("M2 - Direction: ", str(right_direction), "Speed: ", str(right_motor_output))
+    #     return
 
-    if (x_dot == 0):
-        left_wheel_speed = -theta_dot
-        right_wheel_speed = theta_dot
-    else:
-        left_wheel_speed = x_dot - (theta_dot * wheel_base) / 2
-        right_wheel_speed = x_dot + (theta_dot * wheel_base) / 2
+    # if (x_dot == 0):
+    #     left_wheel_speed = -theta_dot
+    #     right_wheel_speed = theta_dot
+    # else:
+    left_wheel_speed = x_dot - (theta_dot * wheel_base) / 2
+    right_wheel_speed = x_dot + (theta_dot * wheel_base) / 2
     
     print(left_wheel_speed)
     print(right_wheel_speed)
