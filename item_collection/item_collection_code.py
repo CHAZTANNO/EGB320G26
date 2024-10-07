@@ -82,7 +82,7 @@ def bringliftdown():
 if __name__ == "__main__":
     try:
         collect_item(2)
-        bringliftdown()
+        #bringliftdown()
         
     finally:
         cleanup()  # Ensure everything is cleaned up when done
