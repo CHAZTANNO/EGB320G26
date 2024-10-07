@@ -38,7 +38,7 @@ if __name__ == "__main__":
 
         # parse order data
         navSystem.plan_objectives()
-        Frequency = 100.0 #Hz
+        Frequency = 1000.0 #Hz
         Interval = 1.0/Frequency
 
         while True:
@@ -53,7 +53,7 @@ if __name__ == "__main__":
             # MOBILITY
             # update the velo and rot velo as well as LED state
             packerBotSim.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) # 
-            mob.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) #
+            mob.SetTargetVelocities(navSystem.forward_vel, -navSystem.rot_vel) #
             #led.set_LED(navSystem.LEDstate) #
             
 
