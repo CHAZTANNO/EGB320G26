@@ -28,6 +28,7 @@ robotParameters.driveType = ("differential")
 if __name__ == "__main__":
     try:
         packerBotSim = COPPELIA_WarehouseRobot("172.19.22.140", robotParameters, sceneParameters)
+        #'127.0.0.1'
         packerBotSim.StartSimulator()
 
         navSystem = nav.NavClass()
@@ -61,7 +62,7 @@ if __name__ == "__main__":
             # ITEM COLLECTION
             # tell it to collect at the objective height if needed
             if navSystem.itemState == 'Collecting':
-                itemcollection.lift_to_shelf(navSystem.currentObjective.get['height'])
+                itemcollection.lift_to_shelf(navSystem.currentObjective.get['height']+1)
                 itemcollection.close_gripper()
                 packerBotSim.CollectItem(navSystem.currentObjective['height'])
                 navSystem.itemState = 'Collected'
