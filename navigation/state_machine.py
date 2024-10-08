@@ -244,10 +244,7 @@ class leavingRowState(State):
                 event = 'found_pb'
         else:
             if rowEstimate[0] != None and navSys.dataDict['wallPoints'] != None:
-                print(rowEstimate[0])
-                print(navSys.dataDict['wallPoints'])
-                if len(navSys.dataDict['wallPoints'])==2 and navSys.dataDict['wallPoints'][0][0]>1.85:
-                    event = 'row_pose_estimated'
+                event = 'row_pose_estimated'
             else:
                 event = 'row_pose_not_found'
 
