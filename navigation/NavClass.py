@@ -21,8 +21,8 @@ class NavClass:
         self.itemState = 'Not_Collected'
 
         # set max values
-        self.max_forward_vel = 0.15
-        self.max_rot_vel = 0.15
+        self.max_forward_vel = 1
+        self.max_rot_vel = 0.5
 
         self.dataDict = {
             'itemsRB': [],
@@ -478,8 +478,8 @@ class NavClass:
         theta_dot = np.arctan2(force_y, force_x)  # Rotational speed (direction of the resultant force)
 
         # Normalize and scale the velocities to ensure they are within the robot's limits
-        max_linear_speed = 0.1  # Example max speed (adjust based on your robot)
-        max_rotation_speed = 0.5  # Example max rotational speed (adjust based on your robot)
+        max_linear_speed = self.max_forward_vel  # Example max speed (adjust based on your robot)
+        max_rotation_speed = self.max_rot_vel  # Example max rotational speed (adjust based on your robot)
         
         # Normalize the linear velocity
         speed = np.hypot(force_x, force_y)
@@ -557,8 +557,8 @@ class NavClass:
         theta_dot = np.arctan2(force_y, force_x)  # Rotational speed (direction of the resultant force)
 
         # Normalize and scale the velocities to ensure they are within the robot's limits
-        max_linear_speed = 0.1  # Example max speed (adjust based on your robot)
-        max_rotation_speed = 0.5  # Example max rotational speed (adjust based on your robot)
+        max_linear_speed = self.max_forward_vel  # Example max speed (adjust based on your robot)
+        max_rotation_speed = self.max_rot_vel  # Example max rotational speed (adjust based on your robot)
 
         # Normalize the linear velocity
         speed = np.hypot(force_x, force_y)
