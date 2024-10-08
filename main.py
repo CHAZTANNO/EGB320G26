@@ -62,7 +62,7 @@ if __name__ == "__main__":
             # ITEM COLLECTION
             # tell it to collect at the objective height if needed
             if navSystem.itemState == 'Collecting':
-                itemcollection.lift_to_shelf(navSystem.currentObjective.get['height']+1)
+                itemcollection.lift_to_shelf(navSystem.currentObjective.get['height'])
                 itemcollection.close_gripper()
                 packerBotSim.CollectItem(navSystem.currentObjective['height'])
                 navSystem.itemState = 'Collected'
