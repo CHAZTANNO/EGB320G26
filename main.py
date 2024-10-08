@@ -5,7 +5,7 @@ from warehousebot_lib import *
 from navigation import NavClass as nav
 from navigation import state_machine as sm
 from mobility import mobility as mob
-#from mobility import led
+from mobility import led
 from item_collection import item_collection_code as itemcollection
 
 import random
@@ -61,12 +61,13 @@ if __name__ == "__main__":
             # ITEM COLLECTION
             # tell it to collect at the objective height if needed
             if navSystem.itemState == 'Collecting':
-                #itemcollection.collect_item(navSystem.currentObjective.get['height'])
+                itemcollection.lift_to_shelf(navSystem.currentObjective.get['height'])
+                itemcollection.close_gripper()
                 packerBotSim.CollectItem(navSystem.currentObjective['height'])
                 navSystem.itemState = 'Collected'
             
             if navSystem.itemState == 'Dropping':
-                #itemcollection.drop_item()
+                itemcollection.drop_item()
                 packerBotSim.Dropitem()
                 navSystem.itemState = 'Not_Collected'
 

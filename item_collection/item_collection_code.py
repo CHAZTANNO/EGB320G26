@@ -1,7 +1,7 @@
 import RPi.GPIO as GPIO
 import time
 
-# Setup GPIO pins for both the scissor lift and the gripper motor
+# Setup GPIO pins 
 GPIO.setmode(GPIO.BCM)
 GPIO.setup(18, GPIO.OUT)  # Scissor lift continuous servo motor on pin 18
 GPIO.setup(19, GPIO.OUT)  # Gripper system servo motor on pin 19
@@ -10,47 +10,92 @@ GPIO.setup(19, GPIO.OUT)  # Gripper system servo motor on pin 19
 pwm_lift = GPIO.PWM(18, 50)  # 50Hz frequency for the lift
 pwm_gripper = GPIO.PWM(19, 50)  # 50Hz frequency for the gripper
 
-# Start PWM with 0% duty cycle to avoid immediate movement
+# Start PWM with 0% duty cycle
 pwm_lift.start(0)
 pwm_gripper.start(0)
 
-# Shelf level times (in seconds) for moving to each level (adjust based on testing)
+# Shelf level times (in seconds) for moving to each level 
 shelf_times = {
-    0: 1.5,  # Bottom shelf
-    1: 20.0,  # Middle shelf (you mentioned this is longer)
-    2: 4.5   # Top shelf
+    0: 1.5,  # Bottom shelf (starting position)
+    1: 18.0,  # Middle shelf (shelf 1)
+    2: 40.0   # Top shelf (shelf 2) 
 }
 
-# Function to move the scissor lift to the desired height and grab the item
-def collect_item(shelf_level):
+# Time to lower from shelf 2 to shelf 1 
+shelf_2_to_1_time = 20.0  
+
+# Global variable to track the current shelf level
+current_shelf = 0  # Starting position is level 0 (ground)
+
+# Function to move the scissor lift to the desired height
+def lift_to_shelf(shelf_level):
+    global current_shelf  # Update global shelf level
     if shelf_level in shelf_times:
         target_time = shelf_times[shelf_level]
         print(f"Lifting to level {shelf_level} (approx. time: {target_time}s)")
         
-        # Move the lift up (adjust the duty cycle as needed for your servo)
-        pwm_lift.ChangeDutyCycle(12.0)  # Example duty cycle for moving the lift
+        # Move the lift up 
+        pwm_lift.ChangeDutyCycle(12.0)  # Duty cycle to move the lift up
         time.sleep(target_time)  # Simulate time to reach the target level
         
         # Stop the lift motor after reaching the shelf
         pwm_lift.ChangeDutyCycle(0)  # Turn off the motor
         print(f"Lift stopped at level {shelf_level}")
         
-        # Close the gripper to grab the item
-        print("Closing gripper to grab the item...")
-        pwm_gripper.ChangeDutyCycle(9.0)  # Adjust this value to close the gripper
-        time.sleep(1)  # Allow time for the gripper to close
-        pwm_gripper.ChangeDutyCycle(0)  # Turn off the motor after closing
-        print("Item grabbed.")
+        # Update current shelf level
+        current_shelf = shelf_level
     else:
         print(f"Invalid shelf level: {shelf_level}")
 
-# Function to open the gripper and release the item
+# Function to close the gripper and grab the item
+def close_gripper():
+    print("Closing gripper to grab the item...")
+    pwm_gripper.ChangeDutyCycle(9.0)  
+    time.sleep(1)  # Allow time for the gripper to close
+    pwm_gripper.ChangeDutyCycle(0)  # Turn off the motor after closing
+    print("Gripper closed.")
+
+# Function to lower the lift from shelf 2 to shelf 1
+def lower_lift_to_shelf_1():
+    global current_shelf  # Update global shelf level
+    print(f"Lowering from shelf 2 to shelf 1...")
+    pwm_lift.ChangeDutyCycle(5.0)  # Reverse direction to lower the lift
+    time.sleep(shelf_2_to_1_time)  # Simulate time to lower to shelf 1 
+    pwm_lift.ChangeDutyCycle(0)  # Stop the motor
+    print("Lift lowered to shelf 1.")
+    
+    # Update current shelf level
+    current_shelf = 1
+
+# Function to lower the lift all the way to the starting position
+def lower_lift_to_start(): 
+    global current_shelf  # Access the global current shelf level
+    
+    if current_shelf == 2:
+        # Lower from shelf 2 to the starting position
+        print(f"Lowering from shelf 2 to the starting position...")
+        total_time = shelf_times[2]  # Use the time it takes to go up to shelf 2
+        pwm_lift.ChangeDutyCycle(5.0)  # Reverse direction to lower the lift
+        time.sleep(total_time)  # Simulate time to lower to the starting point
+        pwm_lift.ChangeDutyCycle(0)  # Stop the motor
+        print("Lift lowered to the starting point.")
+    
+    elif current_shelf == 1:
+        # Lower directly from shelf 1 to the starting position
+        print(f"Lowering from shelf 1 to the starting position...")
+        total_time = shelf_times[1]  # Use the time it takes to go up to shelf 1
+        pwm_lift.ChangeDutyCycle(5.0)  # Reverse direction to lower the lift
+        time.sleep(total_time)  # Simulate time to lower to the starting point
+        pwm_lift.ChangeDutyCycle(0)  # Stop the motor
+        print("Lift lowered to the starting point.")
+
+    # Reset current shelf to 0 after reaching the starting position
+    current_shelf = 0
+
+# Function to open the gripper 
 def drop_item():
     print("Opening gripper to release the item...")
-    
-    # **Adjust Duty Cycle**: Try a different value than 5.0 for opening
-    pwm_gripper.ChangeDutyCycle(12.5)  # Example duty cycle to open the gripper (adjust this value)
-    
+    pwm_gripper.ChangeDutyCycle(12.5)  
     time.sleep(1)  # Allow time for the gripper to open fully
     pwm_gripper.ChangeDutyCycle(0)  # Turn off the motor after opening
     print("Item released.")
@@ -65,24 +110,26 @@ def cleanup():
     pwm_gripper.stop()
     GPIO.cleanup()
 
-def bringliftdown():
-    print("Bringing scissor lift back down...")
-
-    # Move the lift down (adjust the duty cycle to rotate the servo the opposite way)
-    pwm_lift.ChangeDutyCycle(5.0)  # Example duty cycle to lower the lift (counterclockwise)
-
-    # Adjust the sleep time based on how long it takes for the lift to fully retract
-    time.sleep(15)  # Adjust based on the time it takes to return to the starting position
-
-    # Stop the lift motor after reaching the bottom
-    pwm_lift.ChangeDutyCycle(0)  # Turn off the motor
-    print("Lift is back to the start position.")
-
-# Testing
+# Testing 
 if __name__ == "__main__":
     try:
-        #collect_item(1)
-        bringliftdown()
+        # Lift to shelf 2
+        lift_to_shelf(2)
+        time.sleep(2)  # Wait before closing gripper
         
+        # Grab the item
+        close_gripper()
+        time.sleep(2)  # Wait before lowering
+        
+        # Lower from shelf 2 to shelf 1
+        lower_lift_to_shelf_1()
+        time.sleep(2)  # Wait before opening gripper
+        
+        # Drop the item at shelf 1
+        drop_item()
+
+        # Lower the lift back to the starting position
+        lower_lift_to_start()
+
     finally:
         cleanup()  # Ensure everything is cleaned up when done
