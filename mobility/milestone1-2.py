@@ -81,13 +81,13 @@ def control_loop(stdscr):
             # Move backward
             elif key == ord('s'):
                 board.motor_movement([board.M1], board.CW, speed)   # Motor 1 Backward
-                board.motor_movement([board.M2], board.CCW, speed)    # Motor 2 Backward
+                board.motor_movement([board.M2], board.CW, speed)    # Motor 2 Backward
                 stdscr.addstr(1, 0, "Moving backward    ")
 
             # Turn left
             elif key == ord('a'):
-                board.motor_movement([board.M1], board.CCW, speed)    # Motor 1 Forward
-                board.motor_movement([board.M2], board.CW, speed)    # Motor 2 Backward
+                board.motor_movement([board.M1], board.CW, speed)    # Motor 1 Forward
+                board.motor_movement([board.M2], board.CCW, speed)    # Motor 2 Backward
                 stdscr.addstr(1, 0, "Turning left       ")
 
             # Turn right
