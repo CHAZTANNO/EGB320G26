@@ -39,8 +39,8 @@ def SetTargetVelocities(x_dot, theta_dot):
     # Parameters based on motor and robot specs
     wheel_base = 0.15  # meters
     wheel_diameter = 0.039  # meters
-    max_motor_rpm = 280  # Loaded RPM
-    max_motor_output = 100  # Motor output range is 0-100
+    max_motor_rpm = 260  # Loaded RPM
+    max_motor_output = 70  # Motor output range is 0-100
     
     # if (x_dot == 0 and theta_dot == 0):
     #     # board.motor_movement([board.M1], left_direction, left_motor_output)
