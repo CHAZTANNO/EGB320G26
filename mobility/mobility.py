@@ -2,7 +2,7 @@ from __future__ import print_function
 from math import pi
 import time
 import argparse  # For handling command-line arguments
-from DFRobot_RaspberryPi_DC_Motor import THIS_BOARD_TYPE, DFRobot_DC_Motor_IIC as Board
+from .DFRobot_RaspberryPi_DC_Motor import THIS_BOARD_TYPE, DFRobot_DC_Motor_IIC as Board
 
 if THIS_BOARD_TYPE:
     board = Board(1, 0x10)  # RaspberryPi select bus 1, set address to 0x10
