@@ -58,8 +58,8 @@ def SetTargetVelocities(x_dot, theta_dot):
     #     left_wheel_speed = -theta_dot
     #     right_wheel_speed = theta_dot
     # else:
-    left_wheel_speed = x_dot - (theta_dot * wheel_base) / 2
-    right_wheel_speed = x_dot + (theta_dot * wheel_base) / 2
+    left_wheel_speed = x_dot - ((theta_dot * wheel_base) / 2)
+    right_wheel_speed = x_dot + ((theta_dot * wheel_base) / 2)
     
     print(left_wheel_speed)
     print(right_wheel_speed)
