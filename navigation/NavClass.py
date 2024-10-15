@@ -143,7 +143,7 @@ class NavClass:
             self.itemState = 'Collecting'
         
         elif state == 'bayReversalState':
-            self.forward_vel = -0.01
+            self.forward_vel = -0.05
             self.rot_vel = 0
 
         elif state == 'leavingRowState':
