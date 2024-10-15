@@ -591,7 +591,7 @@ class visionSystem:
         return self
 
 vision_system = visionSystem().startCapture()
-globalFrame = np.zeros((vision_system.frameSizeX, vision_system.frameSizeY, 3), np.uint8)
+# globalFrame = np.zeros((vision_system.frameSizeX, vision_system.frameSizeY, 3), np.uint8)
 
 
 while(1):

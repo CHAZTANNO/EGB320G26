@@ -7,10 +7,12 @@ from navigation import state_machine as sm
 from mobility import mobility as mob
 from mobility import led
 from item_collection import item_collection_code as itemcollection
+from vision import EGB320_v20 as vis
 
 import random
 import time
 import numpy as np
+import cv2
 
 # SET SCENE PARAMETERS
 sceneParameters = SceneParameters()
@@ -29,11 +31,13 @@ if __name__ == "__main__":
     try:
         packerBotSim = COPPELIA_WarehouseRobot("131.181.33.22", robotParameters, sceneParameters)
         #'127.0.0.1'
-        packerBotSim.StartSimulator()
+        #packerBotSim.StartSimulator()
 
         navSystem = nav.NavClass()
         led.setup()
         mob.setupMob()
+        visSys = vis.visionSystem()
+        vision_system = visSys.startCapture()
 
         
 
@@ -47,13 +51,16 @@ if __name__ == "__main__":
 
             # VISION SYSTEM
             # pull vision data in correct format
+            GetDetectedObjectsOutput = vision_system.GetDetectedObjects()
+            GetDetectedWallPointsOutput = vision_system.GetDetectedWallPoints()
 
             # NAVIGATION
-            navSystem.update(packerBotSim.GetDetectedObjects(), packerBotSim.GetDetectedWallPoints())
+            navSystem.update(GetDetectedObjectsOutput, GetDetectedWallPointsOutput)
+            # navSystem.update(packerBotSim.GetDetectedObjects(), packerBotSim.GetDetectedWallPoints())
 
             # MOBILITY
             # update the velo and rot velo as well as LED state
-            packerBotSim.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) #
+            #packerBotSim.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) #
             mobfvel, mobrvel = navSystem.normalise_velocity(navSystem.forward_vel, navSystem.rot_vel)
             mob.SetTargetVelocities(mobfvel, -mobrvel) #
             led.set_LED(navSystem.LEDstate)
@@ -64,15 +71,15 @@ if __name__ == "__main__":
             if navSystem.itemState == 'Collecting':
                 #itemcollection.lift_to_shelf(navSystem.currentObjective.get['height'])
                 #itemcollection.close_gripper()
-                packerBotSim.CollectItem(navSystem.currentObjective['height'])
+                #packerBotSim.CollectItem(navSystem.currentObjective['height'])
                 navSystem.itemState = 'Collected'
             
             if navSystem.itemState == 'Dropping':
                 #itemcollection.drop_item()
-                packerBotSim.Dropitem()
+                #packerBotSim.Dropitem()
                 navSystem.itemState = 'Not_Collected'
 
-            packerBotSim.UpdateObjectPositions()
+            #packerBotSim.UpdateObjectPositions()
 
             print(navSystem.LEDstate)
             elapsed = time.time() - now  # how long was it running?
@@ -81,4 +88,6 @@ if __name__ == "__main__":
 
     except KeyboardInterrupt:
         # Attempt to stop simulator so it restarts and don't have to manually press the Stop button in VREP
-        packerBotSim.StopSimulator()
+        vision_system.cap.close()
+        cv2.destroyAllWindows()
+        #packerBotSim.StopSimulator()
