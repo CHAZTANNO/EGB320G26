@@ -100,8 +100,8 @@ class movingDownRowState(State):
         rowNo = navSys.objectiveRow
         chassisOffset = 0.1
 
-        print(navSys.dataDict['rowMarkerRB'][rowNo])
-        print(navSys.dataDict['wallPoints'])
+        # print(navSys.dataDict['rowMarkerRB'][rowNo])
+        # print(navSys.dataDict['wallPoints'])
 
         if navSys.dataDict['rowMarkerRB'][rowNo] != None:
             if navSys.dataDict['rowMarkerRB'][rowNo][0] <= navSys.BAY_DISTANCES[navSys.currentObjective['bay']]:
@@ -333,7 +333,7 @@ class returnItemState(State):
 
     def run(self, navSys):
         print('Returning item...')
-        print(navSys.itemState)
+        #print(navSys.itemState)
         event = ''
 
         if navSys.itemState=='Not_Collected':

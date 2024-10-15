@@ -7,7 +7,7 @@ from navigation import state_machine as sm
 from mobility import mobility as mob
 from mobility import led
 from item_collection import item_collection_code as itemcollection
-from vision import EGB320_v20 as vis
+from vision import EGB320_v21 as vis
 
 import random
 import time
@@ -63,6 +63,8 @@ if __name__ == "__main__":
             #packerBotSim.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) #
             mobfvel, mobrvel = navSystem.normalise_velocity(navSystem.forward_vel, navSystem.rot_vel)
             mob.SetTargetVelocities(mobfvel, -mobrvel) #
+            print(mobfvel)
+            print(-mobrvel)
             led.set_LED(navSystem.LEDstate)
             
 
@@ -81,7 +83,7 @@ if __name__ == "__main__":
 
             #packerBotSim.UpdateObjectPositions()
 
-            print(navSystem.LEDstate)
+            #print(navSystem.LEDstate)s
             elapsed = time.time() - now  # how long was it running?
             if(Interval-elapsed > 0):
                 time.sleep(Interval-elapsed) # wait for amount of time left from interval
