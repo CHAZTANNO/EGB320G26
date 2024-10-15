@@ -37,15 +37,15 @@ if __name__ == "__main__":
         led.setup()
         mob.setupMob()
         visSys = vis.visionSystem()
+        print('MADE IT HERE!')
         vision_system = visSys.startCapture()
-
-        
 
         # parse order data
         navSystem.plan_objectives()
         Frequency = 100.0 #Hz
         Interval = 1.0/Frequency
 
+        print('STARTING MAIN LOOP!')
         while True:
             now = time.time()  # get the time
 
