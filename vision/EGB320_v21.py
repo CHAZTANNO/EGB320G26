@@ -562,7 +562,7 @@ class visionSystem:
         
         #Resize and Display Processed Image
         frameLarge = cv2.resize(globalFrame, (900, 675), interpolation=cv2.INTER_LINEAR)
-        # cv2.imshow("GetDetectedObjects", frameLarge)			# Display frame
+        cv2.imshow("GetDetectedObjects", frameLarge)			# Display frame
 
         cv2.waitKey(1)
         return outputRB
