@@ -32,8 +32,8 @@ if __name__ == "__main__":
         packerBotSim.StartSimulator()
 
         navSystem = nav.NavClass()
-        led.setup()
-        mob.setupMob()
+        #led.setup()
+        #mob.setupMob()
 
         
 
@@ -55,20 +55,20 @@ if __name__ == "__main__":
             # update the velo and rot velo as well as LED state
             packerBotSim.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) #
             mobfvel, mobrvel = navSystem.normalise_velocity(navSystem.forward_vel, navSystem.rot_vel)
-            mob.SetTargetVelocities(mobfvel, -mobrvel) #
-            led.set_LED(navSystem.LEDstate)
+            #mob.SetTargetVelocities(mobfvel, -mobrvel) #
+            #led.set_LED(navSystem.LEDstate)
             
 
             # ITEM COLLECTION
             # tell it to collect at the objective height if needed
             if navSystem.itemState == 'Collecting':
-                itemcollection.lift_to_shelf(navSystem.currentObjective.get['height'])
-                itemcollection.close_gripper()
+                #itemcollection.lift_to_shelf(navSystem.currentObjective.get['height'])
+                #itemcollection.close_gripper()
                 packerBotSim.CollectItem(navSystem.currentObjective['height'])
                 navSystem.itemState = 'Collected'
             
             if navSystem.itemState == 'Dropping':
-                itemcollection.drop_item()
+                #itemcollection.drop_item()
                 packerBotSim.Dropitem()
                 navSystem.itemState = 'Not_Collected'
 
