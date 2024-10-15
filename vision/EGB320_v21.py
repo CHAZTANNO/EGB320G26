@@ -590,14 +590,14 @@ class visionSystem:
         Thread(target=self.captureImage, args=()).start()
         return self
 
-vision_system = visionSystem().startCapture()
-# globalFrame = np.zeros((vision_system.frameSizeX, vision_system.frameSizeY, 3), np.uint8)
+# vision_system = visionSystem().startCapture()
+# # globalFrame = np.zeros((vision_system.frameSizeX, vision_system.frameSizeY, 3), np.uint8)
 
 
-while(1):
-    GetDetectedObjectsOutput = vision_system.GetDetectedObjects()
-    GetDetectedWallPointsOutput = vision_system.GetDetectedWallPoints()
+# while(1):
+#     GetDetectedObjectsOutput = vision_system.GetDetectedObjects()
+#     GetDetectedWallPointsOutput = vision_system.GetDetectedWallPoints()
 
 
-vision_system.cap.close()
-cv2.destroyAllWindows()
+# vision_system.cap.close()
+# cv2.destroyAllWindows()
