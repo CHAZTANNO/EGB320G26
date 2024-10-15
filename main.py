@@ -87,9 +87,9 @@ if __name__ == "__main__":
             elapsed = time.time() - now  # how long was it running?
             if(Interval-elapsed > 0):
                 time.sleep(Interval-elapsed) # wait for amount of time left from interval
-
     except KeyboardInterrupt:
         # Attempt to stop simulator so it restarts and don't have to manually press the Stop button in VREP
         vision_system.cap.close()
         cv2.destroyAllWindows()
+        mob.SetTargetVelocities(0, 0)
         #packerBotSim.StopSimulator()
