@@ -26,6 +26,13 @@ def print_board_status():
     elif board.last_operate_status == board.STA_ERR_SOFT_VERSION:
         print("board status: unsupported board firmware version")
 
+def stopAll():
+    board.motor_movement([board.M1], board.CCW, 0)
+    board.motor_movement([board.M2], board.CCW, 0)
+
+    board.motor_movement([board.M1], board.CCW, 0)
+    board.motor_movement([board.M2], board.CCW, 0)
+
 def SetTargetVelocities(x_dot, theta_dot):
     """
     Set the target velocities for the robot.
