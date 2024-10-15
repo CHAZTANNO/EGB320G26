@@ -239,20 +239,20 @@ class leavingRowState(State):
         event = ''
         rowEstimate = navSys.rowEstimation
 
-        if navSys.objectiveRow == 0:
-            if navSys.dataDict['packingBayRB']!=None:
-                event = 'found_pb'
+        # if navSys.objectiveRow == 0:
+        #     if navSys.dataDict['packingBayRB']!=None:
+        #         event = 'found_pb'
+        # else:
+        if rowEstimate[0] != None and navSys.dataDict['wallPoints'] != None:
+            event = 'row_pose_estimated'
         else:
-            if rowEstimate[0] != None and navSys.dataDict['wallPoints'] != None:
-                event = 'row_pose_estimated'
-            else:
-                event = 'row_pose_not_found'
+            event = 'row_pose_not_found'
 
         #Check transition event
         if event == 'row_pose_estimated':
             return exitingRowState()
-        elif event == 'found_pb':
-            return movingForPBState()
+        # elif event == 'found_pb':
+        #     return movingForPBState()
         else:
             return leavingRowState()
 
