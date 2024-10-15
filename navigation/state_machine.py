@@ -176,7 +176,10 @@ class aligningWithBayState(State):
                 if items != None:
                     for item in items:
                         if item != None:
-                            if item[0] < 0.2:
+                            if isinstance(item, float):
+                                if (items[1] <= 0.25 and items[1] >= -0.25):
+                                    event = 'facing_bay'
+                            elif item[0] < 0.2:
                                 if (item[1] <= 0.25 and item[1] >= -0.25):
                                     event = 'facing_bay'
 
