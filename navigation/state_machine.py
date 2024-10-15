@@ -52,7 +52,7 @@ class explorationState(State):
             if navSys.objectiveRow==0:
                 # row estimation identified
                 event = 'row_pose_estimated'
-            elif navSys.objectiveRow==1 and rowEstimate[0][0]<0.65:
+            elif navSys.objectiveRow==1 and rowEstimate[0][0]<0.50:
                 # row estimation identified
                 event = 'row_pose_estimated'
             elif navSys.objectiveRow==2 and rowEstimate[0][0]<0.45:
