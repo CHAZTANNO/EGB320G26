@@ -63,7 +63,7 @@ class NavClass:
     
     def update(self, detected_objects, detected_walls):
         self.dataDict['itemsRB'], self.dataDict['packingBayRB'], self.dataDict['obstaclesRB'], self.dataDict['rowMarkerRB'], self.dataDict['shelvesRB'] = detected_objects
-        self.dataDict['shelvesRB'] = self.simulator_to_IRL(self.dataDict['shelvesRB']) # not needed once intragrated
+        #self.dataDict['shelvesRB'] = self.simulator_to_IRL(self.dataDict['shelvesRB']) # not needed once intragrated
         self.rowEstimation = self.estimate_row_position(self.dataDict['shelvesRB'])
         self.dataDict['wallPoints'] = detected_walls
         shelfNo = self.currentObjective.get('shelf')
