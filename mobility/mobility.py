@@ -81,8 +81,8 @@ def SetTargetVelocities(x_dot, theta_dot):
     right_direction = board.CW if right_motor_rpm >= 0 else board.CCW
 
     # Scale motor RPM to motor output range (0 to 100 for motor control)
-    left_motor_output = min(max(abs(left_motor_rpm / max_motor_rpm * max_motor_output), 0), max_motor_output)
-    right_motor_output = min(max(abs(right_motor_rpm / max_motor_rpm * max_motor_output), 0), max_motor_output)
+    left_motor_output = min(max(abs(left_motor_rpm / max_motor_rpm * max_motor_output), 15), max_motor_output)
+    right_motor_output = min(max(abs(right_motor_rpm / max_motor_rpm * max_motor_output), 15), max_motor_output)
 
     # Control the motors based on the calculated output values and directions
     board.motor_movement([board.M1], left_direction, left_motor_output)
@@ -149,7 +149,7 @@ def setupMob():
     print("board begin success")
 
     board.set_encoder_enable(board.ALL)
-    board.set_encoder_reduction_ratio(board.ALL, 50)
+    board.set_encoder_reduction_ratio(board.ALL, 100)
     board.set_moter_pwm_frequency(1000)
 
 if __name__ == "__main__":
@@ -162,7 +162,7 @@ if __name__ == "__main__":
     print("board begin success")
 
     board.set_encoder_enable(board.ALL)
-    board.set_encoder_reduction_ratio(board.ALL, 50)
+    board.set_encoder_reduction_ratio(board.ALL, 100)
     board.set_moter_pwm_frequency(1000)
 
     # Argument parsing for command-line mode
