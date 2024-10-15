@@ -90,6 +90,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         # Attempt to stop simulator so it restarts and don't have to manually press the Stop button in VREP
         mob.SetTargetVelocities(0, 0)
+        mob.SetTargetVelocities(0, 0)
         vision_system.cap.close()
         cv2.destroyAllWindows()
         #packerBotSim.StopSimulator()
