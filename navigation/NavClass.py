@@ -243,7 +243,9 @@ class NavClass:
     def estimate_row_position(self, shelfRBData):
         # data will be variable legnth in the form [left_most_visable_shelf... right_most_visable_shelf]
         # Return the row estimation RB
-        if len(shelfRBData)<2:
+        if shelfRBData==None:
+            return [None]
+        elif len(shelfRBData)<2:
             return [None]
         else:
             # we have enough data, use the right most pair
