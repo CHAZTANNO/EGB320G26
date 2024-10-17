@@ -23,7 +23,7 @@ class NavClass:
 
         # set max values
         self.max_forward_vel = 0.15
-        self.max_rot_vel = 2.5
+        self.max_rot_vel = 3
 
         self.dataDict = {
             'itemsRB': [],
@@ -49,7 +49,7 @@ class NavClass:
         self.BAY_DISTANCES = {
             3: 0.1, #0.1315
             2: 0.38, #0.3945
-            1: 0.62, #0.6515
+            1: 0.70, #0.6515
             0: 0.85 #0.9085 
         }
     
