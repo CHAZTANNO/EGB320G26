@@ -111,7 +111,7 @@ def cleanup():
 if __name__ == "__main__":
     try:
         # Ask for user input for shelf number
-        # shelf_number = int(input("Enter the shelf level to lift to (0 for bottom, 1 for middle, 2 for top): "))
+        shelf_number = int(input("Enter the shelf level to lift to (0 for bottom, 1 for middle, 2 for top): "))
         
         # # Lift to the chosen shelf level
         # lift_to_shelf(shelf_number)
