@@ -97,7 +97,9 @@ if __name__ == "__main__":
             
             if navSystem.itemState == 'Dropping':
                 #packerBotSim.Dropitem()
-                #itemCollection.lift_to_shelf(0)
+                if navSystem.liftHeight > 0:
+                    #itemCollection.lower_to_shelf(0)
+                    navSystem.liftHeight = 0
                 #itemcollection.drop_item()
                 navSystem.itemState = 'Not_Collected'
 
