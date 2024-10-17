@@ -402,14 +402,14 @@ class NavClass:
     def potential_fields(self):
         # Define parameters for the potential fields
         attractive_gain = 8  # Gain for the attractive force (towards row markers)
-        repulsive_gain = 1   # Gain for the repulsive force (away from obstacles, shelves, and walls)
+        repulsive_gain = 0   # Gain for the repulsive force (away from obstacles, shelves, and walls)
         safe_distance = 0.3    # Distance at which repulsive force starts to take effect
         random_explore_gain = 0  # Gain for the random exploration force
         left_bias = 0.3
 
         # specific object params
         obstacle_gain = 0
-        shelf_gain = 1
+        shelf_gain = 0
         wall_gain = 0
         packingStation_gain = 0
 
@@ -507,8 +507,6 @@ class NavClass:
         # Ensure theta_dot is within the allowed range
         if abs(theta_dot) > max_rotation_speed:
             theta_dot = np.sign(theta_dot) * max_rotation_speed
-        
-        theta_dot+=left_bias
 
         # Set the target velocities to the robot
         return x_dot, theta_dot
