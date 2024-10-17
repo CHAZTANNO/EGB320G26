@@ -214,6 +214,7 @@ class approachItemState(State):
                 if items != None:
                     for item in items:
                         if item != None:
+                            print(item)
                             if isinstance(item, float):
                                 if (item <= 0.01):
                                     event = 'item_close'
