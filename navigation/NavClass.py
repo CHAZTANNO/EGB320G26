@@ -405,7 +405,7 @@ class NavClass:
         repulsive_gain = 0   # Gain for the repulsive force (away from obstacles, shelves, and walls)
         safe_distance = 0.3    # Distance at which repulsive force starts to take effect
         random_explore_gain = 0  # Gain for the random exploration force
-        left_bias = 0.3
+        left_bias = 0.8
 
         # specific object params
         obstacle_gain = 0
@@ -507,6 +507,8 @@ class NavClass:
         # Ensure theta_dot is within the allowed range
         if abs(theta_dot) > max_rotation_speed:
             theta_dot = np.sign(theta_dot) * max_rotation_speed
+
+        theta_dot+=left_bias
 
         # Set the target velocities to the robot
         return x_dot, theta_dot
