@@ -427,9 +427,7 @@ class NavClass:
             for rowMarker in rowMarkerRB:
                 if rowMarker is not None:
                     rowMarkerRange = rowMarker[0]
-                    rowMarkerBearing = rowMarker[1]
-                    targetRange = rowMarkerRange
-                    targetBearing = rowMarkerBearing
+                    rowMarkerBearing = -rowMarker[1]
                     force_x += attractive_gain * (1.0 / rowMarkerRange) * np.cos(rowMarkerBearing)
                     force_y += attractive_gain * (1.0 / rowMarkerRange) * np.sin(rowMarkerBearing)
                 else:
@@ -455,7 +453,7 @@ class NavClass:
             for shelf in shelvesRB:
                 if shelf is not None:
                     shelfRange = shelf[0]
-                    shelfBearing = -shelf[1]
+                    shelfBearing = shelf[1]
                     if shelfRange < safe_distance:
                         repulsive_force = repulsive_gain * (1.0 / shelfRange - 1.0 / safe_distance) / (shelfRange ** 2)
                         force_x -= repulsive_force * np.cos(shelfBearing) * shelf_gain
