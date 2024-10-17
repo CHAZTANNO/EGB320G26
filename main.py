@@ -67,10 +67,11 @@ if __name__ == "__main__":
             # update the velo and rot velo as well as LED state
             #packerBotSim.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) #
             mobfvel, mobrvel = navSystem.normalise_velocity(navSystem.forward_vel, navSystem.rot_vel)
+            mob.SetTargetVelocities(mobfvel, -mobrvel) #
+
             if state == 'idleState':
-                mob.stopAll()
-            else:
-                mob.SetTargetVelocities(mobfvel, -mobrvel) #
+                break
+
             print(mobfvel)
             print(-mobrvel)
             led.set_LED(navSystem.LEDstate)
@@ -111,6 +112,9 @@ if __name__ == "__main__":
             elapsed = time.time() - now  # how long was it running?
             if(Interval-elapsed > 0):
                 time.sleep(Interval-elapsed) # wait for amount of time left from interval
+
+        mob.stopAll()
+        
     except KeyboardInterrupt:
         # Attempt to stop simulator so it restarts and don't have to manually press the Stop button in VREP
         mob.stopAll()
