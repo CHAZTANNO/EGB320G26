@@ -401,8 +401,8 @@ class NavClass:
 
     def potential_fields(self):
         # Define parameters for the potential fields
-        attractive_gain = 20  # Gain for the attractive force (towards row markers)
-        repulsive_gain = 0   # Gain for the repulsive force (away from obstacles, shelves, and walls)
+        attractive_gain = 1  # Gain for the attractive force (towards row markers)
+        repulsive_gain = 1   # Gain for the repulsive force (away from obstacles, shelves, and walls)
         safe_distance = 0.20    # Distance at which repulsive force starts to take effect
         random_explore_gain = 0  # Gain for the random exploration force
 
