@@ -403,12 +403,12 @@ class NavClass:
         # Define parameters for the potential fields
         attractive_gain = 1  # Gain for the attractive force (towards row markers)
         repulsive_gain = 1   # Gain for the repulsive force (away from obstacles, shelves, and walls)
-        safe_distance = 0.5    # Distance at which repulsive force starts to take effect
+        safe_distance = 0.3    # Distance at which repulsive force starts to take effect
         random_explore_gain = 0  # Gain for the random exploration force
 
         # specific object params
         obstacle_gain = 0
-        shelf_gain = 2
+        shelf_gain = 1
         wall_gain = 0
         packingStation_gain = 0
 
