@@ -118,6 +118,8 @@ class NavClass:
             # vels = self.calculate_resultant_velocity(attractive_f, repulsive_f)
             #self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
             self.forward_vel, self.rot_vel = self.potential_fields()
+            print('FORWARD VEL: ' + str(self.forward_vel))
+            print('ROT VEL: ' + str(self.rot_vel))
 
         elif state == 'lostInRowState':
             # spin in a circle
