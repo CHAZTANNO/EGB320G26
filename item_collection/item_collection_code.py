@@ -112,10 +112,10 @@ def bringliftdown():
     print("Bringing scissor lift back down...")
 
     # Move the lift down (adjust the duty cycle to rotate the servo the opposite way)
-    pwm_lift.ChangeDutyCycle(18.0)  # Example duty cycle to lower the lift (counterclockwise)
+    pwm_lift.ChangeDutyCycle(12.0)  # Example duty cycle to lower the lift (counterclockwise)
 
     # Adjust the sleep time based on how long it takes for the lift to fully retract
-    time.sleep(5.0)  # Adjust based on the time it takes to return to the starting position
+    time.sleep(18.0)  # Adjust based on the time it takes to return to the starting position
 
     # Stop the lift motor after reaching the bottom
     pwm_lift.ChangeDutyCycle(0)  # Turn off the motor
