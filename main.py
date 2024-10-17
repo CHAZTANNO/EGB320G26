@@ -15,23 +15,23 @@ import numpy as np
 import cv2
 
 # SET SCENE PARAMETERS
-# sceneParameters = SceneParameters()
-# sceneParameters.bayContents = np.random.randint(0, 6, (6, 4, 3))  # Correct function name: np.random.randint
-# sceneParameters.bayContents[0, 3, 1] = (warehouseObjects.bowl)  # Specify a bowl in the bay
+sceneParameters = SceneParameters()
+sceneParameters.bayContents = np.random.randint(0, 6, (6, 4, 3))  # Correct function name: np.random.randint
+sceneParameters.bayContents[0, 3, 1] = (warehouseObjects.bowl)  # Specify a bowl in the bay
 
-# sceneParameters.obstacle0_StartingPosition = None
-# sceneParameters.obstacle1_StartingPosition = None
-# sceneParameters.obstacle2_StartingPosition = None
+sceneParameters.obstacle0_StartingPosition = None
+sceneParameters.obstacle1_StartingPosition = None
+sceneParameters.obstacle2_StartingPosition = None
 
 # SET ROBOT PARAMETERS
-# robotParameters = RobotParameters()
-# robotParameters.driveType = ("differential")
+robotParameters = RobotParameters()
+robotParameters.driveType = ("differential")
 
 if __name__ == "__main__":
     try:
-        # packerBotSim = COPPELIA_WarehouseRobot("131.181.33.22", robotParameters, sceneParameters)
-        #'127.0.0.1'
-        #packerBotSim.StartSimulator()
+        packerBotSim = COPPELIA_WarehouseRobot("10.88.40.27", robotParameters, sceneParameters)
+        # '127.0.0.1'
+        packerBotSim.StartSimulator()
 
         navSystem = nav.NavClass()
         led.setup()
