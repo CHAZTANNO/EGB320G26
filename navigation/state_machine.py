@@ -215,9 +215,9 @@ class approachItemState(State):
                     for item in items:
                         if item != None:
                             if isinstance(item, float):
-                                if (item <= 0.1):
+                                if (item <= 0.03):
                                     event = 'item_close'
-                            elif item[0] <= 0.1:
+                            elif item[0] <= 0.03:
                                 event = 'item_close'
 
         if event=='item_close':

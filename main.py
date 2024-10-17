@@ -67,7 +67,10 @@ if __name__ == "__main__":
             # update the velo and rot velo as well as LED state
             #packerBotSim.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) #
             mobfvel, mobrvel = navSystem.normalise_velocity(navSystem.forward_vel, navSystem.rot_vel)
-            mob.SetTargetVelocities(mobfvel, -mobrvel) #
+            if state == 'idleState':
+                mob.stopAll()
+            else:
+                mob.SetTargetVelocities(mobfvel, -mobrvel) #
             print(mobfvel)
             print(-mobrvel)
             led.set_LED(navSystem.LEDstate)

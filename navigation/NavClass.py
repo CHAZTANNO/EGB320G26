@@ -180,8 +180,7 @@ class NavClass:
         
         elif state == 'idleState':
             # stop
-            self.forward_vel = 0
-            self.rot_vel = 0
+            pass
         
         else:
             pass
