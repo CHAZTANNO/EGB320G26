@@ -32,7 +32,7 @@ def lift_to_shelf(shelf_level):
         print(f"Lifting to level {shelf_level} (approx. time: {target_time}s)")
         
         # Move the lift up 
-        pwm_lift.ChangeDutyCycle(12.0)  # Duty cycle to move the lift up
+        pwm_lift.ChangeDutyCycle(5.0)  # Duty cycle to move the lift up
         time.sleep(target_time)  # Simulate time to reach the target level
         
         # Stop the lift motor after reaching the shelf
@@ -107,25 +107,25 @@ def cleanup():
     pwm_gripper.stop()
     GPIO.cleanup()
 
-# Testing section 
-if __name__ == "__main__":
-    try:
-        # Ask for user input for shelf number
-        shelf_number = int(input("Enter the shelf level to lift to (0 for bottom, 1 for middle, 2 for top): "))
+# # Testing section 
+# if __name__ == "__main__":
+#     try:
+#         # Ask for user input for shelf number
+#         shelf_number = int(input("Enter the shelf level to lift to (0 for bottom, 1 for middle, 2 for top): "))
         
-        # Lift to the chosen shelf level
-        lift_to_shelf(shelf_number)
-        time.sleep(3)  # Wait for 3 seconds before grabbing the item
+#         # Lift to the chosen shelf level
+#         lift_to_shelf(shelf_number)
+#         time.sleep(3)  # Wait for 3 seconds before grabbing the item
         
-        # Grab the item
-        close_gripper()
-        time.sleep(3)  # Wait for 3 seconds before releasing the item
+#         # Grab the item
+#         close_gripper()
+#         time.sleep(3)  # Wait for 3 seconds before releasing the item
         
-        # Drop the item
-        drop_item()
+#         # Drop the item
+#         drop_item()
         
-        # Lower the lift back to the starting position
-        lower_lift_to_start()
+#         # Lower the lift back to the starting position
+#         lower_lift_to_start()
 
-    finally:
-        cleanup()  # Ensure everything is cleaned up when done
+#     finally:
+#         cleanup()  # Ensure everything is cleaned up when done
