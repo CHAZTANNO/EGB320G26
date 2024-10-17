@@ -408,7 +408,7 @@ class NavClass:
 
         # specific object params
         obstacle_gain = 0
-        shelf_gain = 1
+        shelf_gain = 2
         wall_gain = 0
         packingStation_gain = 0
 
