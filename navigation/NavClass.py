@@ -574,11 +574,22 @@ class NavClass:
 
         # Calculate the resultant velocity commands
         x_dot = force_x  # Linear speed in x direction
-        theta_dot = np.arctan2(force_y, force_x)  # Rotational speed (direction of the resultant force)
+        theta = np.arctan2(force_y, force_x)  # Rotational speed (direction of the resultant force)
 
         # Normalize and scale the velocities to ensure they are within the robot's limits
         max_linear_speed = self.max_forward_vel  # Example max speed (adjust based on your robot)
         max_rotation_speed = self.max_rot_vel  # Example max rotational speed (adjust based on your robot)
+
+        # Adjust gain factor to determine the responsiveness of the rotation
+        rotational_gain = 2.0  # You can tune this value
+
+        # Calculate rotational velocity proportional to the force angle
+        theta_dot = rotational_gain * theta * abs(x_dot)
+
+        # Clamp the rotational velocity to the maximum allowed value
+        max_rotation_speed = self.max_rot_vel
+        if abs(theta_dot) > max_rotation_speed:
+            theta_dot = np.sign(theta_dot) * max_rotation_speed
 
         # Normalize the linear velocity
         speed = np.hypot(force_x, force_y)
