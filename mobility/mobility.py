@@ -71,15 +71,15 @@ def SetTargetVelocities(x_dot, theta_dot):
     left_wheel_speed = x_dot - (theta_dot * wheel_base) / 2
     right_wheel_speed = x_dot + (theta_dot * wheel_base) / 2
     
-    print(left_wheel_speed)
-    print(right_wheel_speed)
+    # print(left_wheel_speed)
+    # print(right_wheel_speed)
  
     # Convert wheel speeds (rad/s) to motor RPM
     # RPM = (V / (π × D)) × 60
     left_motor_rpm = (left_wheel_speed / (pi * wheel_diameter)) * 60
     right_motor_rpm = (right_wheel_speed / (pi * wheel_diameter)) * 60
-    print(left_motor_rpm)
-    print(right_motor_rpm)
+    # print(left_motor_rpm)
+    # print(right_motor_rpm)
 
     # Determine the direction for each motor based on wheel speed
     # left_direction = "CCW" if left_motor_rpm >= 0 else "CW"
@@ -94,8 +94,8 @@ def SetTargetVelocities(x_dot, theta_dot):
     # Control the motors based on the calculated output values and directions
     board.motor_movement([board.M1], left_direction, left_motor_output)
     board.motor_movement([board.M2], right_direction, right_motor_output)
-    print("M1 - Direction: ", str(left_direction), "Speed: ", str(left_motor_output))
-    print("M2 - Direction: ", str(right_direction), "Speed: ", str(right_motor_output))
+    # print("M1 - Direction: ", str(left_direction), "Speed: ", str(left_motor_output))
+    # print("M2 - Direction: ", str(right_direction), "Speed: ", str(right_motor_output))
 
 def control_loop():
     """
