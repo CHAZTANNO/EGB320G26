@@ -249,7 +249,7 @@ class bayReversalState(State):
             event = 'row_centered'
 
         if event=='row_centered':
-            return liftStabilisationState()
+            return idleState() # for a 4
         else:
             return bayReversalState()
         
