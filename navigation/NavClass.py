@@ -93,7 +93,11 @@ class NavClass:
             # vels = self.calculate_resultant_velocity(attractive_f, repulsive_f)
             # self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
 
-            self.forward_vel, self.rot_vel = self.pf_packing_bay()
+            if self.dataDict['packingBayRB'] != None:
+                self.forward_vel, self.rot_vel = self.pf_packing_bay()
+            else:
+                self.forward_vel = 0
+                self.rot_vel = self.max_rot_vel*0.8
         
         elif state == 'explorationState':
             self.forward_vel = 0
