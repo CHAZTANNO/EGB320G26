@@ -543,17 +543,6 @@ class NavClass:
             force_x += attractive_gain * (1.0 / packingBayRange) * np.cos(packingBayBearing)
             force_y += attractive_gain * (1.0 / packingBayRange) * np.sin(packingBayBearing)
 
-        # Calculate repulsive forces from obstacles
-        if obstaclesRB is not None:
-            for obstacle in obstaclesRB:
-                if obstacle is not None:
-                    obstacleRange = obstacle[0]
-                    obstacleBearing = obstacle[1]
-                    if obstacleRange < safe_distance:
-                        repulsive_force = repulsive_gain * (1.0 / obstacleRange - 1.0 / safe_distance) / (obstacleRange ** 2)
-                        force_x -= repulsive_force * np.cos(obstacleBearing) * obstacle_gain
-                        force_y -= repulsive_force * np.sin(obstacleBearing) * obstacle_gain
-
         # Calculate repulsive forces from walls
         if wallsRB is not None:
             for wall in wallsRB:
@@ -599,10 +588,6 @@ class NavClass:
         speed = np.hypot(force_x, force_y)
         if speed > max_linear_speed:
             x_dot = max_linear_speed * (force_x / speed)
-
-        # Ensure theta_dot is within the allowed range
-        if abs(theta_dot) > max_rotation_speed:
-            theta_dot = np.sign(theta_dot) * max_rotation_speed
 
         # Set the target velocities to the robot
         return x_dot, theta_dot
