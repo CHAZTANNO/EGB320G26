@@ -20,6 +20,9 @@ class NavClass:
         self.LEDstate = 'RED'
         self.itemState = 'Not_Collected'
         self.liftHeight = 0
+        self.prevThetaDot = 0
+        self.rotational_gain = 2.0  # Adjust for smoother rotation
+        self.alpha = 0.8  # Low-pass filter smoothing factor (0 < alpha < 1)
 
         # set max values
         self.max_forward_vel = 0.15
@@ -496,7 +499,7 @@ class NavClass:
         rotational_gain = 1.0  # You can tune this value
 
         # Calculate rotational velocity proportional to the force angle
-        theta_dot = rotational_gain * theta * abs(x_dot)
+        theta_dot = self.calculate_smooth_rotational_velocity(theta, x_dot)
 
         # Clamp the rotational velocity to the maximum allowed value
         max_rotation_speed = self.max_rot_vel
@@ -717,3 +720,19 @@ class NavClass:
             theta_dot = np.sign(theta_dot) * max_rotation_speed
 
         return x_dot, theta_dot
+
+    def calculate_smooth_rotational_velocity(self, force_angle, x_dot):
+        # Calculate raw rotational velocity proportional to the force angle
+        theta_dot = self.rotational_gain * force_angle * abs(x_dot)
+
+        # Clamp rotational velocity to max limits
+        theta_dot = np.clip(theta_dot, -self.max_rot_vel, self.max_rot_vel)
+
+        # Apply low-pass filter to smooth the rotational velocity
+        smoothed_theta_dot = (1 - self.alpha) * self.prev_theta_dot + self.alpha * theta_dot
+
+        # Update previous theta_dot for the next iteration
+        self.prev_theta_dot = smoothed_theta_dot
+
+        return smoothed_theta_dot
+
