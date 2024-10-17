@@ -57,6 +57,7 @@ if __name__ == "__main__":
             # VISION SYSTEM
             # pull vision data in correct format
             GetDetectedObjectsOutput = vision_system.GetDetectedObjects()
+            print(GetDetectedObjectsOutput)
             GetDetectedWallPointsOutput = vision_system.GetDetectedWallPoints()
 
             # NAVIGATION
@@ -67,7 +68,7 @@ if __name__ == "__main__":
             # update the velo and rot velo as well as LED state
             #packerBotSim.SetTargetVelocities(navSystem.forward_vel, navSystem.rot_vel) #
             mobfvel, mobrvel = navSystem.normalise_velocity(navSystem.forward_vel, navSystem.rot_vel)
-            mob.SetTargetVelocities(mobfvel, mobrvel) #
+            mob.SetTargetVelocities(mobfvel, -mobrvel) #
 
             if state == 'idleState':
                 break
