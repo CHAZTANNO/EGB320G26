@@ -107,6 +107,20 @@ def cleanup():
     pwm_gripper.stop()
     GPIO.cleanup()
 
+#Function to bring the scissor lift back to the start (down)
+def bringliftdown():
+    print("Bringing scissor lift back down...")
+
+    # Move the lift down (adjust the duty cycle to rotate the servo the opposite way)
+    pwm_lift.ChangeDutyCycle(5.0)  # Example duty cycle to lower the lift (counterclockwise)
+
+    # Adjust the sleep time based on how long it takes for the lift to fully retract
+    time.sleep(1.5)  # Adjust based on the time it takes to return to the starting position
+
+    # Stop the lift motor after reaching the bottom
+    pwm_lift.ChangeDutyCycle(0)  # Turn off the motor
+    print("Lift is back to the start position.")
+
 # # Testing section 
 if __name__ == "__main__":
     try:
@@ -125,7 +139,8 @@ if __name__ == "__main__":
         # drop_item()
         
         # Lower the lift back to the starting position
-        lower_lift_to_start()
+        # lower_lift_to_start()
+        bringliftdown()
 
     finally:
         cleanup()  # Ensure everything is cleaned up when done
