@@ -100,7 +100,7 @@ class NavClass:
                 self.forward_vel, self.rot_vel = self.pf_packing_bay()
             else:
                 self.forward_vel = 0
-                self.rot_vel = self.max_rot_vel*0.8
+                self.rot_vel = self.max_rot_vel
         
         elif state == 'explorationState':
             self.forward_vel = 0
