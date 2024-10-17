@@ -6,7 +6,7 @@ from navigation import NavClass as nav
 from navigation import state_machine as sm
 from mobility import mobility as mob
 from mobility import led
-from item_collection import item_collection_code as itemcollection
+from item_collection import item_collection_code as itemCollection
 from vision import EGB320_v21 as vis
 
 import random
@@ -45,9 +45,14 @@ if __name__ == "__main__":
         Frequency = 100.0 #Hz
         Interval = 1.0/Frequency
 
+        # raise lift to shelf 2
+        #itemCollection.lift_to_shelf(1)
+        navSystem.liftHeight = 1
+
         print('STARTING MAIN LOOP!')
         while True:
             now = time.time()  # get the time
+            state = str(navSystem.my_sm.get_current_state())
 
             # VISION SYSTEM
             # pull vision data in correct format
@@ -69,17 +74,33 @@ if __name__ == "__main__":
             
 
             # ITEM COLLECTION
+            if state == 'adjustingLiftHeightState':
+                if navSystem.liftHeight != navSystem.currentObjective['height']:
+                    #itemCollection.lift_to_shelf(navSystem.currentObjective['height'])
+                    navSystem.liftHeight = navSystem.currentObjective['height']
+            
+            if state == 'liftStabilisationState':
+                if navSystem.liftHeight != 1:
+                     #itemCollection.lift_to_shelf(1)
+                     navSystem.liftHeight = 1
+
             # tell it to collect at the objective height if needed
             if navSystem.itemState == 'Collecting':
-                #itemcollection.lift_to_shelf(navSystem.currentObjective.get['height'])
                 #itemcollection.close_gripper()
                 #packerBotSim.CollectItem(navSystem.currentObjective['height'])
                 navSystem.itemState = 'Collected'
             
             if navSystem.itemState == 'Dropping':
-                #itemcollection.drop_item()
                 #packerBotSim.Dropitem()
+                #itemCollection.lift_to_shelf(0)
+                #itemcollection.drop_item()
                 navSystem.itemState = 'Not_Collected'
+
+                # change to new objective
+                index = navSystem.objectives.index(navSystem.currentObjective)+1
+                length = len(navSystem.objectives)
+                if index <= length:
+                    navSystem.currentObjective = navSystem.objectives[index]
 
             #packerBotSim.UpdateObjectPositions()
 

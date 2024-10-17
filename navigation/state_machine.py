@@ -185,9 +185,24 @@ class aligningWithBayState(State):
 
         if event=='facing_bay':
             navSys.LEDstate = 'YELLOW'
-            return approachItemState()
+            return adjustingLiftHeightState()
         else:
             return aligningWithBayState()
+        
+
+class adjustingLiftHeightState(State):
+
+    def run(self, navSys):
+        print('Adjusting lift to item height...')
+        event = ''
+
+        if navSys.liftHeight == navSys.currentObjective['height']:
+            event = 'lift_aligned'
+
+        if event=='lift_aligned':
+            return approachItemState()
+        else:
+            return adjustingLiftHeightState()
 
 class approachItemState(State):
 
@@ -234,9 +249,22 @@ class bayReversalState(State):
             event = 'row_centered'
 
         if event=='row_centered':
-            return leavingRowState()
+            return liftStabilisationState()
         else:
             return bayReversalState()
+        
+class liftStabilisationState(State):
+
+    def run(self, navSys):
+        event = ''
+
+        if  navSys.liftHeight == 1:
+            event = 'lift_stable'
+
+        if event=='lift_stable':
+            return leavingRowState()
+        else:
+            return liftStabilisationState()
 
 class leavingRowState(State):
 

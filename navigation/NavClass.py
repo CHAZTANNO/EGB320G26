@@ -19,6 +19,7 @@ class NavClass:
         self.timerB = 0
         self.LEDstate = 'RED'
         self.itemState = 'Not_Collected'
+        self.liftHeight = 0
 
         # set max values
         self.max_forward_vel = 0.15
@@ -170,6 +171,10 @@ class NavClass:
             #             self.forward_vel, self.rot_vel = self.potential_field_to_point(tuple(self.dataDict['wallPoints'][1]))
         
         elif state == 'returnItemState':
+            self.forward_vel=0
+            self.rot_vel=0
+
+        elif state == 'adjustingLiftHeightState' or state == 'liftStabilisationState':
             self.forward_vel=0
             self.rot_vel=0
         
