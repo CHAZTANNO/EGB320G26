@@ -95,7 +95,7 @@ if __name__ == "__main__":
 
             # tell it to collect at the objective height if needed
             if navSystem.itemState == 'Collecting':
-                #itemcollection.close_gripper()
+                itemCollection.close_gripper()
                 #packerBotSim.CollectItem(navSystem.currentObjective['height'])
                 navSystem.itemState = 'Collected'
             
@@ -121,6 +121,10 @@ if __name__ == "__main__":
                 time.sleep(Interval-elapsed) # wait for amount of time left from interval
 
         mob.stopAll()
+        led.set_LED("OFF")
+        if navSystem.liftHeight > 0:
+            itemCollection.lower_lift_to_start()
+        itemCollection.drop_item()
         
     except KeyboardInterrupt:
         # Attempt to stop simulator so it restarts and don't have to manually press the Stop button in VREP
