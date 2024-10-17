@@ -121,8 +121,8 @@ if __name__ == "__main__":
         close_gripper()
         # time.sleep(3)  # Wait for 3 seconds before releasing the item
         
-        # # Drop the item
-        # drop_item()
+        # Drop the item
+        drop_item()
         
         # # Lower the lift back to the starting position
         # lower_lift_to_start()
