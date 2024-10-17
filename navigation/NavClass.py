@@ -97,7 +97,7 @@ class NavClass:
         
         elif state == 'explorationState':
             self.forward_vel = 0
-            self.rot_vel = -self.max_rot_vel*0.5
+            self.rot_vel = -self.max_rot_vel*0.8
         
         elif state == 'searchState' or state == 'exitingRowState':
             # what is attractive in this state
@@ -132,9 +132,9 @@ class NavClass:
         elif state == 'aligningWithBayState':
             self.forward_vel = 0
             if (self.currentObjective['shelf'] % 2) == 0:
-                self.rot_vel = self.max_rot_vel*0.5
+                self.rot_vel = self.max_rot_vel*0.8
             else:
-                self.rot_vel = -self.max_rot_vel*0.5
+                self.rot_vel = -self.max_rot_vel*0.8
         
         elif state == 'approachItemState':
             self.forward_vel = 0.05
