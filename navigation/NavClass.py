@@ -518,10 +518,10 @@ class NavClass:
         attractive_gain = 5  # Gain for the attractive force (towards the packing bay)
         repulsive_gain = 1   # Gain for the repulsive force (away from obstacles, walls, and shelves)
         safe_distance = 0.15    # Distance at which repulsive force starts to take effect
-        obstacle_gain = 8     # Specific gain for obstacles
+        obstacle_gain = 0     # Specific gain for obstacles
         wall_gain = 1           # Specific gain for walls
         shelf_gain = 1          # Specific gain for shelves
-        packingStation_gain = 5  # Specific gain for packing station
+        packingStation_gain = 1  # Specific gain for packing station
 
         # Initialize the resultant force (x, y) components
         force_x = 0.0
