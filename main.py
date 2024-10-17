@@ -35,7 +35,6 @@ if __name__ == "__main__":
 
         navSystem = nav.NavClass()
         led.setup()
-        mob.setupMob()
         visSys = vis.visionSystem()
         print('MADE IT HERE!')
         vision_system = visSys.startCapture()
@@ -50,6 +49,7 @@ if __name__ == "__main__":
         navSystem.liftHeight = 1
 
         print('STARTING MAIN LOOP!')
+        mob.setupMob()
         while True:
             now = time.time()  # get the time
             state = str(navSystem.my_sm.get_current_state())
