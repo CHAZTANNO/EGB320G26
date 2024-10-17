@@ -17,7 +17,7 @@ pwm_gripper.start(0)
 # Shelf level times (in seconds) for moving to each level 
 shelf_times = {
     0: 0,  # Bottom shelf (starting position)
-    1: 16.0,  # Middle shelf (shelf 1)
+    1: 18.0,  # Middle shelf (shelf 1)
     2: 40.0   # Top shelf (shelf 2) 
 }
 
