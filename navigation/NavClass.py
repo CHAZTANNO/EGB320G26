@@ -20,7 +20,7 @@ class NavClass:
         self.LEDstate = 'RED'
         self.itemState = 'Not_Collected'
         self.liftHeight = 0
-        self.prevThetaDot = 0
+        self.prev_theta_dot = 0
         self.rotational_gain = 2.0  # Adjust for smoother rotation
         self.alpha = 0.8  # Low-pass filter smoothing factor (0 < alpha < 1)
 
