@@ -42,7 +42,7 @@ if __name__ == "__main__":
 
         # parse order data
         navSystem.plan_objectives()
-        Frequency = 100.0 #Hz
+        Frequency = 1000.0 #Hz
         Interval = 1.0/Frequency
 
         # raise lift to shelf 2
