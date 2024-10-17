@@ -152,7 +152,7 @@ def setupMob():
     while board.begin() != board.STA_OK:
         print_board_status()
         print("board begin failed")
-        time.sleep(2)
+        time.sleep(1)
     print("board begin success")
 
     board.set_encoder_enable(board.ALL)
