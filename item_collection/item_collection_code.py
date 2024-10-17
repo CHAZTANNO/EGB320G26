@@ -32,7 +32,7 @@ def lift_to_shelf(shelf_level):
         print(f"Lifting to level {shelf_level} (approx. time: {target_time}s)")
         
         # Move the lift up 
-        pwm_lift.ChangeDutyCycle(5.0)  # Duty cycle to move the lift up
+        pwm_lift.ChangeDutyCycle(12.0)  # Duty cycle to move the lift up
         time.sleep(target_time)  # Simulate time to reach the target level
         
         # Stop the lift motor after reaching the shelf
