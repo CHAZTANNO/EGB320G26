@@ -577,7 +577,7 @@ class NavClass:
         max_rotation_speed = self.max_rot_vel  # Example max rotational speed (adjust based on your robot)
 
         # Adjust gain factor to determine the responsiveness of the rotation
-        rotational_gain = 2.0  # You can tune this value
+        rotational_gain = 1.0  # You can tune this value
 
         # Calculate rotational velocity proportional to the force angle
         theta_dot = rotational_gain * theta * abs(x_dot)
