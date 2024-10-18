@@ -537,7 +537,7 @@ class NavClass:
         wall_gain = 1           # Specific gain for walls
         shelf_gain = 1          # Specific gain for shelves
         packingStation_gain = 1  # Specific gain for packing station
-        right_bias = -0.1
+        right_bias = -0.15
 
         # Initialize the resultant force (x, y) components
         force_x = 0.0
