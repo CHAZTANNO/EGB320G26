@@ -107,8 +107,9 @@ class movingDownRowState(State):
                 event = 'arrived_at_bay'
             else:
                 event = 'travelling_to_bay'
-        elif navSys.dataDict['rowMarkerRB'][rowNo] == None and navSys.currentObjective['bay'] == 3:
-            event = 'arrived_at_bay'
+        elif navSys.currentObjective['bay'] == 3:
+            if navSys.dataDict['rowMarkerRB'][rowNo][0] <= navSys.BAY_DISTANCES[2]:
+                event = 'arrived_at_bay_2'
         else:
             event = 'lost_in_row'
         
@@ -118,8 +119,32 @@ class movingDownRowState(State):
             return aligningWithBayState()
         elif event == 'lost_in_row':
             return lostInRowState()
+        elif event == 'arrived_at_bay_2':
+            navSys.timerA = datetime.now()
+            return bruteForcingBay3State()
         else:
             return movingDownRowState()
+
+class bruteForcingBay3State(State):
+
+    def run(self, navSys):
+        print('At bay 2, moving to 3...')
+        event = ''
+        rowNo = navSys.objectiveRow
+        navSys.timerB = datetime.now()
+
+        delta = navSys.timerB - navSys.timerA
+        seconds = delta.total_seconds()
+
+        if seconds >= 2:
+            event = 'arrived_at_bay'
+        
+        #Check transition event
+        if event == 'arrived_at_bay':
+            navSys.timerA = datetime.now()
+            return aligningWithBayState()
+        else:
+            return bruteForcingBay3State()
 
 class lostInRowState(State):
 
