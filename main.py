@@ -46,7 +46,7 @@ if __name__ == "__main__":
         Interval = 1.0/Frequency
 
         # raise lift to shelf 2
-        #itemCollection.lift_to_shelf(1)
+        itemCollection.lift_to_shelf(1)
         navSystem.liftHeight = 1
 
         print('STARTING MAIN LOOP!')
