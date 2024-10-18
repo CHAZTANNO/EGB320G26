@@ -136,7 +136,7 @@ class bruteForcingBay3State(State):
         delta = navSys.timerB - navSys.timerA
         seconds = delta.total_seconds()
 
-        if seconds >= 2:
+        if seconds >= 3.5:
             event = 'arrived_at_bay'
         
         #Check transition event
