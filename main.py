@@ -116,9 +116,9 @@ if __name__ == "__main__":
             #packerBotSim.UpdateObjectPositions()
 
             #print(navSystem.LEDstate)s
-            elapsed = time.time() - now  # how long was it running?
-            if(Interval-elapsed > 0):
-                time.sleep(Interval-elapsed) # wait for amount of time left from interval
+            # elapsed = time.time() - now  # how long was it running?
+            # if(Interval-elapsed > 0):
+            #     time.sleep(Interval-elapsed) # wait for amount of time left from interval
 
         mob.stopAll()
         led.set_LED("OFF")
