@@ -208,7 +208,8 @@ class aligningWithBayState(State):
 
         if event=='facing_bay':
             navSys.LEDstate = 'YELLOW'
-            return adjustingLiftHeightState()
+            #return adjustingLiftHeightState()
+            return idleState()
         else:
             return aligningWithBayState()
         
@@ -409,6 +410,11 @@ class idleState(State):
     def run(self, navSys):
         print('Idling...')
         return idleState()
+    
+class stopState(State)
+    
+    def run (self, navSys):
+        return stopState()
 
 class stateMachine():
     def __init__(self):

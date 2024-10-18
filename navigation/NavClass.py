@@ -193,6 +193,9 @@ class NavClass:
         elif state == 'idleState':
             # stop
             pass
+
+        elif state == 'stopState':
+            pass
         
         else:
             pass
