@@ -412,7 +412,7 @@ class NavClass:
         repulsive_gain = 0   # Gain for the repulsive force (away from obstacles, shelves, and walls)
         safe_distance = 0.3    # Distance at which repulsive force starts to take effect
         random_explore_gain = 0  # Gain for the random exploration force
-        left_bias = 2
+        left_bias = 1.7
 
         # specific object params
         obstacle_gain = 0
