@@ -108,14 +108,14 @@ class movingDownRowState(State):
                 event = 'arrived_at_bay'
             else:
                 event = 'travelling_to_bay'
-        elif navSys.dataDict['rowMarkerRB'][rowNo] == None and navSys.currentObjective['bay'] == 3:
-            if navSys.dataDict['wallPoints'] != None:
-                if navSys.dataDict['wallPoints'][0] != None:
-                    if navSys.dataDict['wallPoints'][0][1] != None:
-                        if navSys.dataDict['wallPoints'][0][1] <= 0.1:
-                            event = 'arrived_at_bay'
-            else:
-                event = 'lost_in_row'
+        # elif navSys.dataDict['rowMarkerRB'][rowNo] == None and navSys.currentObjective['bay'] == 3:
+        #     if navSys.dataDict['wallPoints'] != None:
+        #         if navSys.dataDict['wallPoints'][0] != None:
+        #             if navSys.dataDict['wallPoints'][0][1] != None:
+        #                 if navSys.dataDict['wallPoints'][0][1] <= 0.1:
+        #                     event = 'arrived_at_bay'
+            # else:
+            #     event = 'lost_in_row'
         else:
             event = 'lost_in_row'
         
