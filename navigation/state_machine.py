@@ -111,7 +111,10 @@ class movingDownRowState(State):
             else:
                 event = 'travelling_to_bay'
         else:
-            event = 'lost_in_row'
+            if rowNo == 2:
+                event = 'travelling_to_bay'
+            else:
+                event = 'lost_in_row'
         
         #Check transition event
         if event == 'arrived_at_bay':
