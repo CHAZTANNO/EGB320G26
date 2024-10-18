@@ -27,7 +27,7 @@ class startState(State):
         if rowNo == 2:
             event = 'finished_calibration'
         elif rowNo == 1:
-            if navSys.dataDict['packingBayRB'] != None and (navSys.dataDict['packingBayRB'][0] <= 0.30):
+            if navSys.dataDict['packingBayRB'] != None and (navSys.dataDict['packingBayRB'][0] <= 0.50):
                 event = 'finished_calibration'
         else:
             if navSys.dataDict['packingBayRB'] == None:
