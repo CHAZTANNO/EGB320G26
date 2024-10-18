@@ -555,27 +555,27 @@ class NavClass:
             force_x += attractive_gain * (1.0 / packingBayRange) * np.cos(packingBayBearing)
             force_y += attractive_gain * (1.0 / packingBayRange) * np.sin(packingBayBearing)
 
-        # Calculate repulsive forces from walls
-        if wallsRB is not None:
-            for wall in wallsRB:
-                if wall is not None:
-                    wallRange = wall[0]
-                    wallBearing = wall[1]
-                    if wallRange < safe_distance:
-                        repulsive_force = repulsive_gain * (1.0 / wallRange - 1.0 / safe_distance) / (wallRange ** 2)
-                        force_x -= repulsive_force * np.cos(wallBearing) * wall_gain
-                        force_y -= repulsive_force * np.sin(wallBearing) * wall_gain
+        # # Calculate repulsive forces from walls
+        # if wallsRB is not None:
+        #     for wall in wallsRB:
+        #         if wall is not None:
+        #             wallRange = wall[0]
+        #             wallBearing = wall[1]
+        #             if wallRange < safe_distance:
+        #                 repulsive_force = repulsive_gain * (1.0 / wallRange - 1.0 / safe_distance) / (wallRange ** 2)
+        #                 force_x -= repulsive_force * np.cos(wallBearing) * wall_gain
+        #                 force_y -= repulsive_force * np.sin(wallBearing) * wall_gain
 
-        # Calculate repulsive forces from shelves
-        if shelvesRB is not None:
-            for shelf in shelvesRB:
-                if shelf is not None:
-                    shelfRange = shelf[0]
-                    shelfBearing = shelf[1]
-                    if shelfRange < safe_distance:
-                        repulsive_force = repulsive_gain * (1.0 / shelfRange - 1.0 / safe_distance) / (shelfRange ** 2)
-                        force_x -= repulsive_force * np.cos(shelfBearing) * shelf_gain
-                        force_y -= repulsive_force * np.sin(shelfBearing) * shelf_gain
+        # # Calculate repulsive forces from shelves
+        # if shelvesRB is not None:
+        #     for shelf in shelvesRB:
+        #         if shelf is not None:
+        #             shelfRange = shelf[0]
+        #             shelfBearing = shelf[1]
+        #             if shelfRange < safe_distance:
+        #                 repulsive_force = repulsive_gain * (1.0 / shelfRange - 1.0 / safe_distance) / (shelfRange ** 2)
+        #                 force_x -= repulsive_force * np.cos(shelfBearing) * shelf_gain
+        #                 force_y -= repulsive_force * np.sin(shelfBearing) * shelf_gain
 
         # Calculate the resultant velocity commands
         x_dot = force_x  # Linear speed in x direction
@@ -602,7 +602,7 @@ class NavClass:
             x_dot = max_linear_speed * (force_x / speed)
 
         # Set the target velocities to the robot
-        return x_dot, theta_dot
+        return x_dot, -theta_dot
 
     
     def back_out_of_row(self):
