@@ -51,7 +51,7 @@ class NavClass:
         # bay centers, need to add offeset of camera pos
         self.BAY_DISTANCES = {
             3: 0.1, #0.1315
-            2: 0.40, #0.3945
+            2: 0.50, #0.3945
             1: 0.61, #0.6515
             0: 0.85 #0.9085 
         }
@@ -527,7 +527,7 @@ class NavClass:
         wall_gain = 1           # Specific gain for walls
         shelf_gain = 1          # Specific gain for shelves
         packingStation_gain = 1  # Specific gain for packing station
-        right_bias = -0.6
+        right_bias = -0.3
 
         # Initialize the resultant force (x, y) components
         force_x = 0.0
