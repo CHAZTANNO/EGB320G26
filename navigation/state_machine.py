@@ -411,7 +411,7 @@ class idleState(State):
         print('Idling...')
         return idleState()
     
-class stopState(State)
+class stopState(State):
     
     def run (self, navSys):
         return stopState()
