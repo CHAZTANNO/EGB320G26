@@ -527,6 +527,7 @@ class NavClass:
         wall_gain = 1           # Specific gain for walls
         shelf_gain = 1          # Specific gain for shelves
         packingStation_gain = 1  # Specific gain for packing station
+        right_bias = -1
 
         # Initialize the resultant force (x, y) components
         force_x = 0.0
@@ -578,7 +579,7 @@ class NavClass:
         rotational_gain = 1.0  # You can tune this value
 
         # Calculate rotational velocity proportional to the force angle
-        theta_dot = rotational_gain * theta * abs(x_dot)
+        theta_dot = rotational_gain * theta * abs(x_dot) + right_bias
 
         # Clamp the rotational velocity to the maximum allowed value
         max_rotation_speed = self.max_rot_vel
