@@ -144,9 +144,9 @@ class NavClass:
         elif state == 'aligningWithBayState':
             self.forward_vel = 0
             if (self.currentObjective['shelf'] % 2) == 0:
-                self.rot_vel = self.max_rot_vel*0.8
+                self.rot_vel = self.max_rot_vel*0.9
             else:
-                self.rot_vel = -self.max_rot_vel*0.8
+                self.rot_vel = -self.max_rot_vel*0.9
         
         elif state == 'approachItemState':
             self.forward_vel = 0.05
