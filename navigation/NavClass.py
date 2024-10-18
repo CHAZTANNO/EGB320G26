@@ -51,7 +51,7 @@ class NavClass:
         # bay centers, need to add offeset of camera pos
         self.BAY_DISTANCES = {
             3: 0.1, #0.1315
-            2: 0.45, #0.3945
+            2: 0.37, #0.3945
             1: 0.61, #0.6515
             0: 0.85 #0.9085 
         }
