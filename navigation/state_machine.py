@@ -28,7 +28,7 @@ class startState(State):
             if navSys.dataDict['packingBayRB'] != None and (navSys.dataDict['packingBayRB'][0] <= 1.9):
                 event = 'finished_calibration'
         elif rowNo == 1:
-            if navSys.dataDict['packingBayRB'] != None and (navSys.dataDict['packingBayRB'][0] <= 0.40):
+            if navSys.dataDict['packingBayRB'] != None and (navSys.dataDict['packingBayRB'][0] <= 0.30):
                 event = 'finished_calibration'
         else:
             if navSys.dataDict['packingBayRB'] == None:
@@ -52,7 +52,7 @@ class explorationState(State):
             if navSys.objectiveRow==0:
                 # row estimation identified
                 event = 'row_pose_estimated'
-            elif navSys.objectiveRow==1 and rowEstimate[0][0]<0.60:
+            elif navSys.objectiveRow==1 and rowEstimate[0][0]<0.70:
                 # row estimation identified
                 event = 'row_pose_estimated'
             elif navSys.objectiveRow==2 and rowEstimate[0][0]<0.70:
