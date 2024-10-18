@@ -104,7 +104,7 @@ class NavClass:
         
         elif state == 'explorationState':
             self.forward_vel = 0
-            self.rot_vel = -self.max_rot_vel*0.8
+            self.rot_vel = -self.max_rot_vel
         
         elif state == 'searchState' or state == 'exitingRowState':
             # what is attractive in this state
