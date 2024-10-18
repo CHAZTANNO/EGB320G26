@@ -447,6 +447,8 @@ class NavClass:
                     random_force_y = random.uniform(-2, 2)
                     force_x += random_explore_gain * random_force_x
                     force_y += random_explore_gain * random_force_y
+        else:
+            return 0.05, 0
 
         # Calculate repulsive forces from obstacles
         if obstaclesRB is not None:
