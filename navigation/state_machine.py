@@ -2,6 +2,7 @@ import time
 import random
 from navigation import NavClass as nav
 from datetime import datetime
+from ..item_collection import item_collection_code as itemCollection
 
 class State:
 
@@ -285,6 +286,9 @@ class collectItemState(State):
 
     def run(self, navSys):
         event = ''
+        itemCollection.close_gripper()
+        navSys.itemState = 'Collected'
+
         if navSys.itemState == 'Collected':
             event = 'item_collected'
 
