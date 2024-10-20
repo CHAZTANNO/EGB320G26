@@ -39,7 +39,7 @@ class startState(State):
 
         #Check transition event
         if event == 'finished_calibration':
-            return explorationState()
+            return searchState()
         else:
             return startState()
 

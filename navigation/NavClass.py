@@ -108,14 +108,16 @@ class NavClass:
             self.rot_vel = -self.max_rot_vel
         
         elif state == 'searchState' or state == 'exitingRowState':
-            # what is attractive in this state
-            attractors = []
-            # calculate forces
-            attractive_f, repulsive_f = self.field_force_calculator(attractors)
-            attractive_f.append(self.attraction_calculation(self.rowEstimation[0], 1))
-            # drive towards desired row estimation using potential fields
-            vels = self.calculate_resultant_velocity(attractive_f, repulsive_f)
-            self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
+            # # what is attractive in this state
+            # attractors = []
+            # # calculate forces
+            # attractive_f, repulsive_f = self.field_force_calculator(attractors)
+            # attractive_f.append(self.attraction_calculation(self.rowEstimation[0], 1))
+            # # drive towards desired row estimation using potential fields
+            # vels = self.calculate_resultant_velocity(attractive_f, repulsive_f)
+            # self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
+            self.forward_vel = 0
+            self.rot_vel = -self.max_rot_vel
         
         elif state == 'movingDownRowState':
             # self.forward_vel, self.rot_vel = self.potential_fields()
