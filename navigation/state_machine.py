@@ -219,7 +219,7 @@ class adjustingLiftHeightState(State):
         print('Adjusting lift to item height...')
         event = ''
 
-        if navSys.liftHeight == navSys.currentObjective['height']:
+        if navSys.liftState == 0:
             event = 'lift_aligned'
 
         if event=='lift_aligned':

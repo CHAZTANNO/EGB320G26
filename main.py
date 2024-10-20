@@ -80,6 +80,7 @@ if __name__ == "__main__":
 
             # ITEM COLLECTION
             if state == 'adjustingLiftHeightState':
+                navSystem.liftState = 1
                 if navSystem.liftHeight != navSystem.currentObjective['height']:
                     if navSystem.currentObjective['height'] == 0:
                         itemCollection.lower_lift_to_shelf_1()
@@ -89,6 +90,7 @@ if __name__ == "__main__":
                     if itemCollection.getICShelfState() == navSystem.currentObjective['height']:
                         navSystem.liftHeight = navSystem.currentObjective['height']
                         break
+                navSystem.liftState = 0
 
             if state == 'liftStabilisationState':
                 if navSystem.liftHeight != 1:

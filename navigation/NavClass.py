@@ -23,6 +23,7 @@ class NavClass:
         self.prev_theta_dot = 0
         self.rotational_gain = 2.0  # Adjust for smoother rotation
         self.alpha = 0.8  # Low-pass filter smoothing factor (0 < alpha < 1)
+        self.liftState = 0
 
         # set max values
         self.max_forward_vel = 0.15
