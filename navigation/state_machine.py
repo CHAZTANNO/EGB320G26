@@ -239,9 +239,9 @@ class approachItemState(State):
                         if item != None:
                             print("Item Distance:" + str(item))
                             if isinstance(item, float):
-                                if (item <= 0.01):
+                                if (item <= 0.005):
                                     event = 'item_close'
-                            elif item[0] <= 0.01:
+                            elif item[0] <= 0.005:
                                 event = 'item_close'
 
         if event=='item_close':
