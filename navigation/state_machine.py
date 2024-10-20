@@ -276,6 +276,7 @@ class approachItemState(State):
             event = 'item_close'
 
         if event=='item_close':
+            navSys.itemState = 'Close'
             return collectItemState()
         else:
             return approachItemState()
