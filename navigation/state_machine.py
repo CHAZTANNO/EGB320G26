@@ -255,8 +255,7 @@ class approachItemState(State):
             event = 'item_close'
 
         if event=='item_close':
-            #return collectItemState()
-            return idleState()
+            return collectItemState()
         else:
             return approachItemState()
 
