@@ -13,6 +13,7 @@ import random
 import time
 import numpy as np
 import cv2
+import datetime
 
 # # SET SCENE PARAMETERS
 # sceneParameters = SceneParameters()
@@ -92,6 +93,7 @@ if __name__ == "__main__":
                     if itemCollection.getICShelfState() == navSystem.currentObjective['height']:
                         navSystem.liftHeight = navSystem.currentObjective['height']
                         break
+                navSystem.timerA = datetime.now()
                 navSystem.liftState = 0
 
             if state == 'liftStabilisationState':
