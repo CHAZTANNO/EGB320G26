@@ -276,7 +276,7 @@ class approachItemState(State):
 
         print(seconds)
 
-        if seconds >= 2:
+        if seconds >= 1.5:
             event = 'item_close'
 
         if event=='item_close':
