@@ -274,6 +274,8 @@ class approachItemState(State):
         delta = navSys.timerB - navSys.timerA
         seconds = delta.total_seconds()
 
+        print(seconds)
+
         if seconds >= 3:
             event = 'item_close'
 
