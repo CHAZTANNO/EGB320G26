@@ -85,7 +85,7 @@ if __name__ == "__main__":
                         itemCollection.lower_lift_to_shelf_1(0)
                     elif navSystem.currentObjective['height'] == 1:
                         itemCollection.lift_to_shelf(1)
-                navSystem.liftHeight = navSystem.currentObjective['height']
+                    navSystem.liftHeight = navSystem.currentObjective['height']
             
             if state == 'liftStabilisationState':
                 if navSystem.liftHeight != 1:
@@ -124,6 +124,8 @@ if __name__ == "__main__":
         led.set_LED("OFF")
         if navSystem.liftHeight > 0:
             itemCollection.lower_lift_to_start()
+
+        time.sleep(3)
         itemCollection.drop_item()
         
     except KeyboardInterrupt:
