@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
         # raise lift to shelf 2
         #itemCollection.lift_to_shelf(1)
-        navSystem.liftHeight = 1
+        #navSystem.liftHeight = 1
 
         print('STARTING MAIN LOOP!')
         while True:
