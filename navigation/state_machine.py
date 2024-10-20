@@ -208,9 +208,30 @@ class aligningWithBayState(State):
 
         if event=='facing_bay':
             navSys.LEDstate = 'YELLOW'
-            return adjustingLiftHeightState()
+            navSys.timerA = datetime.now()
+            return givingLiftSpace()
         else:
             return aligningWithBayState()
+
+
+class givingLiftSpace(State):
+
+    def run(self, navSys):
+        print('Backing up to give lift space...')
+        navSys.timerB = datetime.now()
+        event = ''
+
+        delta = navSys.timerB - navSys.timerA
+        seconds = delta.total_seconds()
+
+        if seconds >= 1:
+            event = 'space_made'
+
+        if event=='space_made':
+            navSys.timerA = datetime.now()
+            return adjustingLiftHeightState()
+        else:
+            return givingLiftSpace()
         
 
 class adjustingLiftHeightState(State):
