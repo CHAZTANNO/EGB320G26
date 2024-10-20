@@ -2,7 +2,7 @@ import time
 import random
 from navigation import NavClass as nav
 from datetime import datetime
-from ..item_collection import item_collection_code as itemCollection
+from item_collection import item_collection_code as itemCollection
 
 class State:
 
