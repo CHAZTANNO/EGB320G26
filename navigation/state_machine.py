@@ -3,6 +3,7 @@ import random
 from navigation import NavClass as nav
 from datetime import datetime
 from item_collection import item_collection_code as itemCollection
+from mobility import mobility as mob
 
 class State:
 
@@ -285,6 +286,7 @@ class approachItemState(State):
 class collectItemState(State):
 
     def run(self, navSys):
+        mob.stopAll()
         event = ''
         itemCollection.close_gripper()
         navSys.itemState = 'Collected'

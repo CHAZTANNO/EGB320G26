@@ -154,7 +154,6 @@ class NavClass:
             self.rot_vel = 0
         
         elif state == 'collectItemState':
-            self.itemState = 'Collecting'
             self.forward_vel = 0
             self.rot_vel = 0
         
