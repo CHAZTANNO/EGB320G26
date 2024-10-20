@@ -132,8 +132,8 @@ if __name__ == "__main__":
         # time.sleep(3)  # Wait for 3 seconds before grabbing the item
         
         # # # Grab the item
-        # close_gripper()
-        # # time.sleep(3)  # Wait for 3 seconds before releasing the item
+        close_gripper()
+        time.sleep(3)  # Wait for 3 seconds before releasing the item
         
         # # Drop the item
         drop_item()
