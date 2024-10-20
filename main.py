@@ -83,16 +83,21 @@ if __name__ == "__main__":
                 if navSystem.liftHeight != navSystem.currentObjective['height']:
                     if navSystem.currentObjective['height'] == 0:
                         itemCollection.lower_lift_to_shelf_1()
-                        navSystem.liftHeight = navSystem.currentObjective['height']
                     elif navSystem.currentObjective['height'] == 1:
                         itemCollection.lift_to_shelf(1)
+                while True:
+                    if itemCollection.getICShelfState() == navSystem.currentObjective['height']:
                         navSystem.liftHeight = navSystem.currentObjective['height']
-            
+                        break
+
             if state == 'liftStabilisationState':
                 if navSystem.liftHeight != 1:
-                     itemCollection.lift_to_shelf(1)
-                     navSystem.liftHeight = 1
-
+                    itemCollection.lift_to_shelf(1)
+                    while True:
+                        if itemCollection.getICShelfState() == 1:
+                            navSystem.liftHeight = navSystem.currentObjective['height']
+                            break
+                    navSystem.liftHeight = 1
 
             # tell it to collect at the objective height if needed
             if navSystem.itemState == 'Collecting':

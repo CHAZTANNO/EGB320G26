@@ -10,6 +10,8 @@ GPIO.setup(15, GPIO.OUT)  # Gripper system servo motor on pin 19
 pwm_lift = GPIO.PWM(18, 50)  # 50Hz frequency for the lift
 pwm_gripper = GPIO.PWM(15, 50)  # 50Hz frequency for the gripper
 
+state = 0
+
 # Start PWM with 0% duty cycle
 pwm_lift.start(0)
 pwm_gripper.start(0)
@@ -120,6 +122,9 @@ def bringliftdown():
     # Stop the lift motor after reaching the bottom
     pwm_lift.ChangeDutyCycle(0)  # Turn off the motor
     print("Lift is back to the start position.")
+
+def getICShelfState():
+    return current_shelf
 
 # # Testing section 
 if __name__ == "__main__":
