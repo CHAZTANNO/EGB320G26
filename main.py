@@ -83,8 +83,10 @@ if __name__ == "__main__":
                 navSystem.liftState = 1
                 if navSystem.liftHeight != navSystem.currentObjective['height']:
                     if navSystem.currentObjective['height'] == 0:
+                        mob.stopAll()
                         itemCollection.lower_lift_to_shelf_1()
                     elif navSystem.currentObjective['height'] == 1:
+                        mob.stopAll()
                         itemCollection.lift_to_shelf(1)
                 while True:
                     if itemCollection.getICShelfState() == navSystem.currentObjective['height']:
