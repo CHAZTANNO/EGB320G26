@@ -133,7 +133,7 @@ if __name__ == "__main__":
         shelf_number = int(input("Enter the shelf level to lift to (0 for bottom, 1 for middle, 2 for top): "))
         
         # # Lift to the chosen shelf level
-        # lift_to_shelf(shelf_number)
+        lift_to_shelf(shelf_number)
         # time.sleep(3)  # Wait for 3 seconds before grabbing the item
         
         # # # Grab the item
