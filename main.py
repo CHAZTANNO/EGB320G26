@@ -13,7 +13,7 @@ import random
 import time
 import numpy as np
 import cv2
-import datetime
+from datetime import datetime
 
 # # SET SCENE PARAMETERS
 # sceneParameters = SceneParameters()
