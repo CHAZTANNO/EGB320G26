@@ -186,7 +186,11 @@ class NavClass:
             self.forward_vel=0
             self.rot_vel=0
 
-        elif state == 'adjustingLiftHeightState' or state == 'liftStabilisationState':
+        elif state == 'adjustingLiftHeightState':
+            self.forward_vel=0
+            self.rot_vel=0
+
+        elif state == 'liftStabilisationState':
             self.forward_vel=0
             self.rot_vel=0
         

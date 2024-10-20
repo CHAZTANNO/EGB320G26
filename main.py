@@ -82,10 +82,11 @@ if __name__ == "__main__":
             if state == 'adjustingLiftHeightState':
                 if navSystem.liftHeight != navSystem.currentObjective['height']:
                     if navSystem.currentObjective['height'] == 0:
-                        itemCollection.lower_lift_to_shelf_1(0)
+                        itemCollection.lower_lift_to_shelf_1()
+                        navSystem.liftHeight = navSystem.currentObjective['height']
                     elif navSystem.currentObjective['height'] == 1:
                         itemCollection.lift_to_shelf(1)
-                    navSystem.liftHeight = navSystem.currentObjective['height']
+                        navSystem.liftHeight = navSystem.currentObjective['height']
             
             if state == 'liftStabilisationState':
                 if navSystem.liftHeight != 1:
