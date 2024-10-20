@@ -32,7 +32,7 @@ class startState(State):
             if navSys.dataDict['packingBayRB'] != None and (navSys.dataDict['packingBayRB'][0] <= 0.40):
                 event = 'finished_calibration'
         else:
-            if navSys.dataDict['packingBayRB'] == None:
+            if navSys.dataDict['packingBayRB'] != None and (navSys.dataDict['packingBayRB'][0] <= 0.15):    
                 event = 'finished_calibration'
 
         #Check transition event
