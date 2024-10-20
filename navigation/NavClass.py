@@ -195,6 +195,10 @@ class NavClass:
             self.forward_vel=0
             self.rot_vel=0
         
+        elif state == 'givingLiftSpace':
+            self.forward_vel = -0.1
+            self.rot_vel = 0
+        
         elif state == 'idleState':
             # stop
             pass
