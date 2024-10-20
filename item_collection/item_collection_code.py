@@ -145,7 +145,7 @@ if __name__ == "__main__":
         
         # Lower the lift back to the starting position
         # lower_lift_to_start()
-        #bringliftdown()
+        bringliftdown()
 
     finally:
         cleanup()  # Ensure everything is cleaned up when done
