@@ -127,6 +127,9 @@ class NavClass:
             #self.forward_vel, self.rot_vel = self.normalise_velocity(vels[0], vels[1])
             self.forward_vel, self.rot_vel = self.potential_fields()
 
+            if self.objectiveRow == 2:
+                self.forward_vel+=0.05
+
         elif state == 'bruteForcingBay3State':
             # forward a certain distance
             self.forward_vel = self.max_forward_vel
