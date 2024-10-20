@@ -149,7 +149,7 @@ class NavClass:
                 self.rot_vel = -self.max_rot_vel
         
         elif state == 'approachItemState':
-            self.forward_vel = 0.05
+            self.forward_vel = 0.1
             self.rot_vel = 0
         
         elif state == 'collectItemState':

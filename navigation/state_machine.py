@@ -223,6 +223,7 @@ class adjustingLiftHeightState(State):
             event = 'lift_aligned'
 
         if event=='lift_aligned':
+            navSys.timerA = datetime.now()
             return approachItemState()
         else:
             return adjustingLiftHeightState()
@@ -230,19 +231,28 @@ class adjustingLiftHeightState(State):
 class approachItemState(State):
 
     def run(self, navSys):
+        navSys.timerB = datetime.now()
         event = ''
         # check to see if an orange item is directly in front of you and close
-        if navSys.dataDict['itemsRB'] != None:
-            for items in navSys.dataDict['itemsRB']:
-                if items != None:
-                    for item in items:
-                        if item != None:
-                            print("Item Distance:" + str(item))
-                            if isinstance(item, float):
-                                if (item <= 0.005):
-                                    event = 'item_close'
-                            elif item[0] <= 0.005:
-                                event = 'item_close'
+        # if navSys.dataDict['itemsRB'] != None:
+        #     for items in navSys.dataDict['itemsRB']:
+        #         if items != None:
+        #             for item in items:
+        #                 if item != None:
+        #                     print("Item Distance:" + str(item))
+        #                     if isinstance(item, float):
+        #                         if (item <= 0.005):
+        #                             event = 'item_close'
+        #                     elif item[0] <= 0.005:
+        #                         event = 'item_close'
+
+        # drive forward for 3 seconds
+
+        delta = navSys.timerB - navSys.timerA
+        seconds = delta.total_seconds()
+
+        if seconds >= 3:
+            event = 'item_close'
 
         if event=='item_close':
             #return collectItemState()
