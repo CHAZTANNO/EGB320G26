@@ -255,6 +255,8 @@ class approachItemState(State):
 
     def run(self, navSys):
         navSys.timerB = datetime.now()
+        rowNo = navSys.objectiveRow
+        shelfNo = navSys.currentObjective['shelf']
         event = ''
         # check to see if an orange item is directly in front of you and close
         # if navSys.dataDict['itemsRB'] != None:
@@ -274,10 +276,21 @@ class approachItemState(State):
         delta = navSys.timerB - navSys.timerA
         seconds = delta.total_seconds()
 
-        print(seconds)
-
-        if seconds >= 1.6:
-            event = 'item_close'
+        if rowNo == 1:
+            if shelfNo == 2:
+                if seconds >= 2:
+                    event = 'item_close'
+            elif shelfNo == 3:
+                if seconds >= 1.6:
+                    event = 'item_close'
+        elif rowNo == 2:
+            if shelfNo == 4:
+                if seconds >= 2:
+                    event = 'item_close'
+            elif shelfNo == 5:
+                if seconds >= 1.6:
+                    event = 'item_close'
+            
 
         if event=='item_close':
             navSys.itemState = 'Close'
