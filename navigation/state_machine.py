@@ -288,8 +288,8 @@ class collectItemState(State):
     def run(self, navSys):
         mob.stopAll()
         event = ''
-        itemCollection.close_gripper()
-        navSys.itemState = 'Collected'
+        # itemCollection.close_gripper()
+        # navSys.itemState = 'Collected'
 
         if navSys.itemState == 'Collected':
             event = 'item_collected'

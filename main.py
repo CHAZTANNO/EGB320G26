@@ -104,8 +104,9 @@ if __name__ == "__main__":
                     navSystem.liftHeight = 1
 
             # tell it to collect at the objective height if needed
-            if navSystem.itemState == 'Collecting':
+            if state == 'collectItemState':
                 itemCollection.close_gripper()
+                time.sleep(2)
                 #packerBotSim.CollectItem(navSystem.currentObjective['height'])
                 navSystem.itemState = 'Collected'
             
