@@ -279,7 +279,8 @@ class approachItemState(State):
 
         if event=='item_close':
             navSys.itemState = 'Close'
-            return collectItemState()
+            #return collectItemState()
+            return idleState()
         else:
             return approachItemState()
 
