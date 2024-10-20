@@ -208,8 +208,7 @@ class aligningWithBayState(State):
 
         if event=='facing_bay':
             navSys.LEDstate = 'YELLOW'
-            #return adjustingLiftHeightState()
-            return idleState()
+            return adjustingLiftHeightState()
         else:
             return aligningWithBayState()
         
@@ -246,7 +245,8 @@ class approachItemState(State):
                                 event = 'item_close'
 
         if event=='item_close':
-            return collectItemState()
+            #return collectItemState()
+            return idleState()
         else:
             return approachItemState()
 
