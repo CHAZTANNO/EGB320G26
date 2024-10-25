@@ -280,7 +280,7 @@ class approachItemState(State):
 
         if rowNo == 1:
             if shelfNo == 2:
-                if seconds >= 2:
+                if seconds >= 2.4:
                     event = 'item_close'
             elif shelfNo == 3:
                 if seconds >= 1.4:
